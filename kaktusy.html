@@ -55,6 +55,10 @@ const game = document.getElementById('game');
 const over = document.getElementById('over');
 const distSpan = document.getElementById('distance');
 
+function checkCollision(a, b) {
+    const ar = a.getBoundingClientRect();
+    const br = b.getBoundingClientRect();
+    const padding = 5; // margines bezpieczeństwa
 function checkCollision(a,b){
     const ar=a.getBoundingClientRect();
     const br=b.getBoundingClientRect();
