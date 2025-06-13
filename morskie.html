@@ -22,11 +22,6 @@
             <h2 class="text-xl font-semibold">2. Wybierz środowisko</h2>
             <div id="habitats" class="grid grid-cols-3 gap-4 text-lg"></div>
             <button id="next-2" class="px-4 py-2 bg-blue-700 text-white rounded disabled:opacity-50" disabled>Dalej</button>
-            <div id="habitats" class="grid grid-cols-3 gap-4 text-xl"></div>
-            <button id="next-2" class="px-4 py-2 bg-blue-700 text-white rounded disabled:opacity-50" disabled>Dalej</button>
-            <h2 class="text-xl font-semibold">2. Wybierz zbiornik</h2>
-            <div id="habitats" class="grid grid-cols-4 gap-4 text-3xl"></div>
-            <button id="next-2" class="mt-4 px-4 py-2 bg-blue-700 text-white rounded disabled:opacity-50" disabled>Dalej</button>
         </section>
         <!-- Step 3: Board with water -->
         <section id="step-3" class="space-y-4 hidden">
@@ -54,15 +49,11 @@
         </section>
     </main>
     <script>
-        const creatures = ['🐠','🦈','🐡','🐙','🐬','🐳','🦀','🐢','🦑'];
-        const creatures = ['🐠','🦈','🐡','🐙','🐬','🐳','🦀','🐢','🦑','🐊','🐍','🐋','🦈'];
         const creatures = ['🐠','🐟','🦈','🐡','🐙','🐬','🐳','🐋','🦀','🐢','🦑','🐊','🐍','🦭'];
         const habitats = ['🌊 Ocean','🌅 Jezioro','🌉 Rzeka','🐠 Akwarium','💧 Kałuża','🏊 Basen','🌌 Głębie'];
         const creaturesDiv = document.getElementById('creatures');
         const habitatsDiv = document.getElementById('habitats');
         let chosen = null;
-        const habitats = ['ocean','lake','river','aquarium','puddle','pool','deep ocean'];
-        const habitatsDiv = document.getElementById('habitats');
         let chosenHabitat = '';
         let habitat = null;
         creatures.forEach(c => {
@@ -115,7 +106,6 @@
             document.getElementById('final').textContent = chosen;
             document.getElementById('summary').textContent = `Stworzenie: ${chosen}, Habitat: ${habitat}`;
             document.getElementById('summary-text').textContent = 'Środowisko: ' + chosenHabitat;
-            document.getElementById('summary').textContent = habitat;
             document.getElementById('step-5').classList.remove('hidden');
         };
         const colorInput = document.getElementById('color');
