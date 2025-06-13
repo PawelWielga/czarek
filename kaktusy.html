@@ -47,7 +47,7 @@
         </div>
     </main>
 <script>
-const dinos = ['\uD83E\uDD96','\uD83E\uDD95','\uD83D\uDC0A'];
+const dinos = ['\uD83E\uDD96','\uD83E\uDD95','\uD83D\uDC0A','\uD83E\uDD8E','\uD83D\uDC0D','\uD83D\uDC38','\uD83D\uDC22'];
 const choicesDiv = document.getElementById('choices');
 let selected = null;
 let gameInterval, cactusInterval, distance=0;
@@ -59,6 +59,14 @@ function checkCollision(a, b) {
     const ar = a.getBoundingClientRect();
     const br = b.getBoundingClientRect();
     const padding = 5; // margines bezpieczeństwa
+function checkCollision(a,b){
+    const ar=a.getBoundingClientRect();
+    const br=b.getBoundingClientRect();
+    const shrink=6;
+    const aLeft=ar.left+shrink, aRight=ar.right-shrink, aTop=ar.top+shrink, aBottom=ar.bottom-shrink;
+    const bLeft=br.left+shrink, bRight=br.right-shrink, bTop=br.top+shrink, bBottom=br.bottom-shrink;
+    return !(aRight<bLeft || aLeft>bRight || aBottom<bTop || aTop>bBottom);
+    const padding=5;
     return !(
         ar.right - padding < br.left + padding ||
         ar.left + padding > br.right - padding ||
