@@ -71,6 +71,7 @@ function startGame() {
     dino.className='dino';
     dino.textContent = selected;
     dino.style.left = '50px';
+    dino.style.bottom = '0px';
     let vy = 0;
     game.innerHTML='';
     game.appendChild(distSpan);
@@ -108,7 +109,7 @@ function startGame() {
         game.appendChild(c);
     }
     gameInterval = setInterval(tick,50);
-    cactusInterval = setInterval(spawn,1200);
+    cactusInterval = setInterval(spawn,1700);
     function endGame(){
         clearInterval(gameInterval);
         clearInterval(cactusInterval);
@@ -129,5 +130,8 @@ dinos.forEach(d=>{
     choicesDiv.appendChild(b);
 });
 </script>
+<footer class="mt-4 text-center text-sm">
+    <p>Nie zapomnijcie zasubskrybować oraz zafollowować mnie na Facebooku! 🦎🦖🐊🐢🐍</p>
+</footer>
 </body>
 </html>
