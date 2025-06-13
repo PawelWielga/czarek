@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skakanie przez kaktusy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #game {
+            position: relative;
+            width: 600px;
+            height: 200px;
+            border: 2px solid #065f46;
+            overflow: hidden;
+            background-color: #ecfdf5;
+        }
+        .dino {
+            position: absolute;
+            bottom: 0;
+            font-size: 48px;
+        }
+        .cactus {
+            position: absolute;
+            bottom: 0;
+            font-size: 40px;
+        }
+        #over {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-green-50 text-green-800 flex flex-col items-center">
+    <header class="p-4 bg-green-700 text-white text-center w-full">
+        <h1 class="text-3xl font-bold">Skakanie przez kaktusy</h1>
+    </header>
+    <main class="p-8 space-y-4 flex flex-col items-center">
+        <section id="choose" class="space-y-4">
+            <h2 class="text-xl font-semibold">Wybierz bohatera</h2>
+            <div id="choices" class="flex gap-4 text-4xl"></div>
+        </section>
+        <div id="game" class="hidden mt-4">
+            <span id="distance" class="absolute top-1 left-1 text-sm"></span>
+        </div>
+        <div id="over" class="mt-4 text-center space-y-4">
+            <h2 class="text-4xl text-red-600 font-bold">GAME OVER</h2>
+            <button id="again" class="px-4 py-2 bg-green-700 text-white rounded">Zagraj jeszcze raz</button>
+        </div>
+    </main>
+<script>
+const dinos = ['\uD83E\uDD96','\uD83E\uDD95','\uD83D\uDC0A'];
+const choicesDiv = document.getElementById('choices');
+let selected = null;
+let gameInterval, cactusInterval, distance=0;
+const game = document.getElementById('game');
+const over = document.getElementById('over');
+const distSpan = document.getElementById('distance');
+
+function checkCollision(a,b){
+    const ar=a.getBoundingClientRect();
+    const br=b.getBoundingClientRect();
+    return !(ar.right<br.left || ar.left>br.right || ar.bottom<br.top || ar.top>br.bottom);
+}
+
+function startGame() {
+    document.getElementById('choose').classList.add('hidden');
+    game.classList.remove('hidden');
+    over.style.display='none';
+    distance = 0;
+    distSpan.textContent = '0';
+    const dino = document.createElement('span');
+    dino.className='dino';
+    dino.textContent = selected;
+    dino.style.left = '50px';
+    let vy = 0;
+    game.innerHTML='';
+    game.appendChild(distSpan);
+    game.appendChild(dino);
+    document.addEventListener('keydown', jump);
+    function jump(e){
+        if(e.code==='Space' && parseInt(dino.style.bottom)===0){
+            vy = 15;
+        }
+    }
+    function tick(){
+        if(vy>0 || parseInt(dino.style.bottom)>0){
+            dino.style.bottom = (parseInt(dino.style.bottom)||0) + vy + 'px';
+            vy -=1;
+            if(parseInt(dino.style.bottom)<0){
+                dino.style.bottom='0';
+                vy=0;
+            }
+        }
+        [...game.getElementsByClassName('cactus')].forEach(c => {
+            c.style.left = (parseInt(c.style.left) - 5) + 'px';
+            if(parseInt(c.style.left) < -20){
+                c.remove();
+            }
+            if(checkCollision(dino,c)) endGame();
+        });
+        distance +=1;
+        distSpan.textContent = distance;
+    }
+    function spawn(){
+        const c = document.createElement('span');
+        c.className='cactus';
+        c.textContent='\uD83C\uDF35';
+        c.style.left = '580px';
+        game.appendChild(c);
+    }
+    gameInterval = setInterval(tick,50);
+    cactusInterval = setInterval(spawn,1200);
+    function endGame(){
+        clearInterval(gameInterval);
+        clearInterval(cactusInterval);
+        document.removeEventListener('keydown', jump);
+        over.style.display='block';
+    }
+    document.getElementById('again').onclick = () => {
+        endGame();
+        startGame();
+    };
+}
+
+dinos.forEach(d=>{
+    const b=document.createElement('button');
+    b.textContent=d;
+    b.className='p-2 border-2 border-green-700 rounded hover:bg-green-100';
+    b.onclick=()=>{selected=d;startGame();};
+    choicesDiv.appendChild(b);
+});
+</script>
+</body>
+</html>
