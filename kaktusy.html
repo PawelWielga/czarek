@@ -62,6 +62,13 @@ function checkCollision(a,b){
     const aLeft=ar.left+shrink, aRight=ar.right-shrink, aTop=ar.top+shrink, aBottom=ar.bottom-shrink;
     const bLeft=br.left+shrink, bRight=br.right-shrink, bTop=br.top+shrink, bBottom=br.bottom-shrink;
     return !(aRight<bLeft || aLeft>bRight || aBottom<bTop || aTop>bBottom);
+    const padding=5;
+    return !(
+        ar.right - padding < br.left + padding ||
+        ar.left + padding > br.right - padding ||
+        ar.bottom - padding < br.top + padding ||
+        ar.top + padding > br.bottom - padding
+    );
 }
 
 function startGame() {
