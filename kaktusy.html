@@ -55,10 +55,16 @@ const game = document.getElementById('game');
 const over = document.getElementById('over');
 const distSpan = document.getElementById('distance');
 
-function checkCollision(a,b){
-    const ar=a.getBoundingClientRect();
-    const br=b.getBoundingClientRect();
-    return !(ar.right<br.left || ar.left>br.right || ar.bottom<br.top || ar.top>br.bottom);
+function checkCollision(a, b) {
+    const ar = a.getBoundingClientRect();
+    const br = b.getBoundingClientRect();
+    const padding = 5; // margines bezpieczeństwa
+    return !(
+        ar.right - padding < br.left + padding ||
+        ar.left + padding > br.right - padding ||
+        ar.bottom - padding < br.top + padding ||
+        ar.top + padding > br.bottom - padding
+    );
 }
 
 function startGame() {
