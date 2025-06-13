@@ -20,6 +20,8 @@
         <!-- Step 2: Choose habitat -->
         <section id="step-2" class="space-y-4 hidden">
             <h2 class="text-xl font-semibold">2. Wybierz środowisko</h2>
+            <div id="habitats" class="grid grid-cols-3 gap-4 text-lg"></div>
+            <button id="next-2" class="px-4 py-2 bg-blue-700 text-white rounded disabled:opacity-50" disabled>Dalej</button>
             <div id="habitats" class="grid grid-cols-3 gap-4 text-xl"></div>
             <button id="next-2" class="px-4 py-2 bg-blue-700 text-white rounded disabled:opacity-50" disabled>Dalej</button>
             <h2 class="text-xl font-semibold">2. Wybierz zbiornik</h2>
@@ -52,6 +54,7 @@
         </section>
     </main>
     <script>
+        const creatures = ['🐠','🦈','🐡','🐙','🐬','🐳','🦀','🐢','🦑'];
         const creatures = ['🐠','🦈','🐡','🐙','🐬','🐳','🦀','🐢','🦑','🐊','🐍','🐋','🦈'];
         const creatures = ['🐠','🐟','🦈','🐡','🐙','🐬','🐳','🐋','🦀','🐢','🦑','🐊','🐍','🦭'];
         const habitats = ['🌊 Ocean','🌅 Jezioro','🌉 Rzeka','🐠 Akwarium','💧 Kałuża','🏊 Basen','🌌 Głębie'];
@@ -110,6 +113,7 @@
         eatBtn.onclick = () => {
             document.getElementById('step-4').classList.add('hidden');
             document.getElementById('final').textContent = chosen;
+            document.getElementById('summary').textContent = `Stworzenie: ${chosen}, Habitat: ${habitat}`;
             document.getElementById('summary-text').textContent = 'Środowisko: ' + chosenHabitat;
             document.getElementById('summary').textContent = habitat;
             document.getElementById('step-5').classList.remove('hidden');
