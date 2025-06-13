@@ -6,11 +6,19 @@
     <title>Morskie Stworzenie</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-blue-50 text-blue-800">
-    <header class="p-4 bg-blue-700 text-white text-center">
-        <h1 class="text-3xl font-bold">Morskie Stworzenie</h1>
+<body class="bg-gray-100 text-gray-800">
+    <header class="bg-gray-800 text-white">
+        <nav class="container mx-auto flex items-center justify-between p-4">
+            <a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+            <ul class="flex space-x-4 text-sm">
+                <li><a href="ewolucja.html" class="hover:underline">Ewolucja</a></li>
+                <li><a href="kaktusy.html" class="hover:underline">Kaktusy</a></li>
+                <li><a href="morskie.html" class="underline">Morskie</a></li>
+            </ul>
+        </nav>
     </header>
-    <main class="p-8 space-y-8">
+    <main class="container mx-auto p-8 space-y-8">
+        <h1 class="text-3xl font-bold">Morskie Stworzenie</h1>
         <!-- Step 1: Choose creature -->
         <section id="step-1" class="space-y-4">
             <h2 class="text-xl font-semibold">1. Wybierz morskie stworzenie</h2>
@@ -48,6 +56,9 @@
             <button id="restart" class="px-4 py-2 bg-blue-700 text-white rounded">Zagraj ponownie</button>
         </section>
     </main>
+    <footer class="mt-8 text-center text-sm text-gray-600">
+        <p>&copy; 2024 Gry Czarka</p>
+    </footer>
     <script>
         const creatures = ['🐠','🐟','🦈','🐡','🐙','🐬','🐳','🐋','🦀','🐢','🦑','🐊','🐍','🦭'];
         const habitats = ['🌊 Ocean','🌅 Jezioro','🌉 Rzeka','🐠 Akwarium','💧 Kałuża','🏊 Basen','🌌 Głębie'];
