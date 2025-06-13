@@ -14,36 +14,46 @@
         <!-- Step 1: Choose creature -->
         <section id="step-1" class="space-y-4">
             <h2 class="text-xl font-semibold">1. Wybierz morskie stworzenie</h2>
-            <div id="creatures" class="grid grid-cols-5 gap-4 text-4xl"></div>
+            <div id="creatures" class="grid grid-cols-6 gap-4 text-4xl"></div>
             <button id="next-1" class="mt-4 px-4 py-2 bg-blue-700 text-white rounded disabled:opacity-50" disabled>Dalej</button>
         </section>
-        <!-- Step 2: Board with water -->
+        <!-- Step 2: Choose habitat -->
         <section id="step-2" class="space-y-4 hidden">
-            <h2 class="text-xl font-semibold">2. Twoja plansza</h2>
-            <div id="board" class="w-64 h-64 flex items-center justify-center text-6xl rounded-full border-4 border-blue-700 bg-blue-200"></div>
-            <button id="next-2" class="px-4 py-2 bg-blue-700 text-white rounded">Dalej</button>
+            <h2 class="text-xl font-semibold">2. Wybierz zbiornik</h2>
+            <div id="habitats" class="grid grid-cols-4 gap-4 text-3xl"></div>
+            <button id="next-2" class="mt-4 px-4 py-2 bg-blue-700 text-white rounded disabled:opacity-50" disabled>Dalej</button>
         </section>
-        <!-- Step 3: Use net and eat -->
+        <!-- Step 3: Board with water -->
         <section id="step-3" class="space-y-4 hidden">
-            <h2 class="text-xl font-semibold">3. Użyj sieci i zjedz</h2>
+            <h2 class="text-xl font-semibold">3. Twoja plansza</h2>
+            <div id="board" class="w-64 h-64 flex items-center justify-center text-6xl rounded-full border-4 border-blue-700 bg-blue-200"></div>
+            <button id="next-3" class="px-4 py-2 bg-blue-700 text-white rounded">Dalej</button>
+        </section>
+        <!-- Step 4: Use net and eat -->
+        <section id="step-4" class="space-y-4 hidden">
+            <h2 class="text-xl font-semibold">4. Użyj sieci i zjedz</h2>
             <div id="nets" class="flex gap-4 text-5xl">
                 <button class="p-2 border-2 border-blue-700 rounded hover:bg-blue-100">🎣</button>
                 <button class="p-2 border-2 border-blue-700 rounded hover:bg-blue-100">🪝</button>
             </div>
             <button id="eat" class="mt-4 px-4 py-2 bg-blue-700 text-white rounded hidden">Zjedz</button>
         </section>
-        <!-- Step 4: Choose color -->
-        <section id="step-4" class="space-y-4 hidden">
-            <h2 class="text-xl font-semibold">4. Kolor kółka</h2>
+        <!-- Step 5: Choose color -->
+        <section id="step-5" class="space-y-4 hidden">
+            <h2 class="text-xl font-semibold">5. Kolor kółka</h2>
             <input type="color" id="color" class="w-24 h-12 border-2 border-blue-700" value="#3b82f6">
             <div id="final" class="w-64 h-64 flex items-center justify-center text-6xl rounded-full border-4" style="background-color:#bfdbfe;"></div>
+            <p id="summary" class="text-lg"></p>
             <button id="restart" class="px-4 py-2 bg-blue-700 text-white rounded">Zagraj ponownie</button>
         </section>
     </main>
     <script>
-        const creatures = ['🐠','🦈','🐡','🐙','🐬','🐳','🦀','🐢','🦑'];
+        const creatures = ['🐠','🐟','🦈','🐡','🐙','🐬','🐳','🐋','🦀','🐢','🦑','🐊','🐍','🦭'];
+        const habitats = ['🌊 Ocean','🌅 Jezioro','🌉 Rzeka','🐠 Akwarium','💧 Kałuża','🏊 Basen','🌌 Głębie'];
         const creaturesDiv = document.getElementById('creatures');
+        const habitatsDiv = document.getElementById('habitats');
         let chosen = null;
+        let habitat = null;
         creatures.forEach(c => {
             const b = document.createElement('button');
             b.textContent = c;
@@ -56,14 +66,30 @@
             };
             creaturesDiv.appendChild(b);
         });
+        habitats.forEach(h => {
+            const b = document.createElement('button');
+            b.textContent = h;
+            b.className = 'p-2 border-2 border-blue-700 rounded hover:bg-blue-100';
+            b.onclick = () => {
+                habitat = h;
+                document.getElementById('next-2').disabled = false;
+                [...habitatsDiv.children].forEach(ch => ch.classList.remove('bg-blue-200'));
+                b.classList.add('bg-blue-200');
+            };
+            habitatsDiv.appendChild(b);
+        });
         document.getElementById('next-1').onclick = () => {
             document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('board').textContent = chosen;
             document.getElementById('step-2').classList.remove('hidden');
         };
         document.getElementById('next-2').onclick = () => {
             document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('board').textContent = chosen;
             document.getElementById('step-3').classList.remove('hidden');
+        };
+        document.getElementById('next-3').onclick = () => {
+            document.getElementById('step-3').classList.add('hidden');
+            document.getElementById('step-4').classList.remove('hidden');
         };
         const eatBtn = document.getElementById('eat');
         document.getElementById('nets').addEventListener('click', e => {
@@ -73,9 +99,10 @@
             }
         });
         eatBtn.onclick = () => {
-            document.getElementById('step-3').classList.add('hidden');
+            document.getElementById('step-4').classList.add('hidden');
             document.getElementById('final').textContent = chosen;
-            document.getElementById('step-4').classList.remove('hidden');
+            document.getElementById('summary').textContent = habitat;
+            document.getElementById('step-5').classList.remove('hidden');
         };
         const colorInput = document.getElementById('color');
         const finalDiv = document.getElementById('final');
