@@ -14,7 +14,7 @@
         nav.open ul { display: block; }
         @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
         button:hover{ transform: scale(1.05); transition: transform .2s; }
-        #game{ position:relative; width:600px; height:200px; overflow:hidden; border:2px solid #065f46; background:#ecfdf5; }
+        #game{ position:relative; width:100%; max-width:600px; height:200px; overflow:hidden; border:2px solid #065f46; background:#ecfdf5; }
         #ground{ position:absolute; bottom:0; left:0; right:0; height:40px; background:#94a3b8; }
         .player{ position:absolute; bottom:40px; left:50px; font-size:48px; }
         .obstacle{ position:absolute; bottom:40px; font-size:40px; }
@@ -53,6 +53,7 @@
         <span id="distance" class="absolute top-1 left-1 text-sm"></span>
         <div id="ground"></div>
     </div>
+    <button id="jumpBtn" class="mt-2 px-4 py-2 bg-green-700 text-white rounded hidden">Skocz</button>
     <div id="over" class="mt-4 text-center space-y-4">
         <h2 class="text-4xl text-red-600 font-bold">KONIEC GRY</h2>
         <button id="again" class="px-4 py-2 bg-green-700 text-white rounded">Zagraj ponownie</button>
@@ -82,6 +83,7 @@ const pointsSpan=document.getElementById('points');
 const overDiv=document.getElementById('over');
 const againBtn=document.getElementById('again');
 const distSpan=document.getElementById('distance');
+const jumpBtn=document.getElementById('jumpBtn');
 let gameInterval, obsInterval, vy=0, points=0;
 function checkCollision(a,b){
  const ar=a.getBoundingClientRect();
@@ -93,6 +95,7 @@ function startGame(){
  game.classList.remove('hidden');
  scoreDiv.classList.remove('hidden');
  overDiv.style.display='none';
+ jumpBtn.classList.remove('hidden');
  ground.style.background='blue';
  const player=document.createElement('span');
  player.className='player';
@@ -107,6 +110,7 @@ function startGame(){
  distSpan.textContent='0';
  document.addEventListener('keydown',jump);
  game.addEventListener('pointerdown',jump);
+ jumpBtn.addEventListener('click',jump);
  function jump(e){
    if((e.code==='Space'||e.type==='pointerdown') && parseInt(player.style.bottom)<=40){
      vy=12;
@@ -126,18 +130,22 @@ function startGame(){
    points++; distSpan.textContent=points; pointsSpan.textContent=points;
  }
  function spawn(){
-   const o=document.createElement('span');
-   o.className='obstacle';
-   o.textContent=obstacles[Math.floor(Math.random()*obstacles.length)];
-   o.style.left='560px';
-   game.appendChild(o);
+  const o=document.createElement('span');
+  o.className='obstacle';
+  o.textContent=obstacles[Math.floor(Math.random()*obstacles.length)];
+  o.style.left='560px';
+  game.appendChild(o);
+ }
+ function scheduleSpawn(){
+  spawn();
+  obsInterval=setTimeout(scheduleSpawn,2500+Math.random()*1000);
  }
  gameInterval=setInterval(tick,50);
- obsInterval=setInterval(spawn,1500);
+ scheduleSpawn();
  function endGame(){
-   clearInterval(gameInterval); clearInterval(obsInterval);
-   document.removeEventListener('keydown',jump); game.removeEventListener('pointerdown',jump);
-   overDiv.style.display='block';
+  clearInterval(gameInterval); clearTimeout(obsInterval);
+  document.removeEventListener('keydown',jump); game.removeEventListener('pointerdown',jump); jumpBtn.removeEventListener('click',jump); jumpBtn.classList.add('hidden');
+  overDiv.style.display='block';
  }
  againBtn.onclick=()=>{endGame();startGame();};
 }
