@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kolonia Nad LiPau - gra 3D w Three.js">
+    <title>Kolonia Nad LiPau</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/three@0.162.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.162.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root { --main-color:#065f46; --bg-color:#f0fdf4; }
+        body { background:var(--bg-color); color:var(--main-color); }
+        body.dark-mode { background:#111; color:#fff; }
+        nav ul { display:none; }
+        nav.open ul { display:block; }
+        @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
+        canvas { touch-action:none; }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+<header class="bg-green-700 text-white w-full">
+    <nav class="container mx-auto flex items-center justify-between p-4">
+        <a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+        <button class="menu-button" aria-label="Otwórz menu">☰</button>
+        <ul class="flex space-x-4 text-sm">
+            <li><a href="ewolucja.html" class="hover:underline">Stworzydło</a></li>
+            <li><a href="kaktusy.html" class="hover:underline">Kaktusy</a></li>
+            <li><a href="slither.html" class="hover:underline">Wąż</a></li>
+            <li><a href="ocean.html" class="hover:underline">Ocean.io</a></li>
+            <li><a href="roslinna.html" class="hover:underline">Wybieranka</a></li>
+        </ul>
+        <button id="darkToggle">Przełącz tryb</button>
+    </nav>
+</header>
+<main class="container mx-auto p-4 space-y-4">
+    <h1 class="text-3xl font-bold text-center">Kolonia Nad LiPau</h1>
+    <div id="setup" class="space-y-4 text-center">
+        <div>
+            <h2 class="text-xl font-semibold mb-2">Wybierz owada</h2>
+            <div id="choices" class="flex justify-center space-x-4"></div>
+        </div>
+        <div class="space-x-4">
+            <label class="font-semibold"><input type="radio" name="mode" value="survival" checked> Survival</label>
+            <label class="font-semibold"><input type="radio" name="mode" value="creative"> Kreatywny</label>
+        </div>
+        <button id="startBtn" class="px-4 py-2 bg-green-700 text-white rounded" disabled>Start</button>
+    </div>
+    <div id="hud" class="hidden text-center space-y-2">
+        <p>Tryb: <span id="modeDisplay"></span> | Zasoby: <span id="resources">0</span> | Kolonia: <span id="life">100</span></p>
+    </div>
+    <div id="container" class="w-full" style="height:60vh"></div>
+    <p id="tip" class="text-center"></p>
+</main>
+<footer class="mt-8 text-center text-sm text-green-600 w-full">
+    <p>&copy; 2024 Gry Czarka</p>
+</footer>
+<script>
+const insects=['🐜','🦋','🐞','🐝'];
+const choicesDiv=document.getElementById('choices');
+let chosen=null; insects.forEach(em=>{ const b=document.createElement('button');
+  b.textContent=em; b.className='text-3xl p-2';
+  b.onclick=()=>{ chosen=em; document.getElementById('startBtn').disabled=false; [...choicesDiv.children].forEach(c=>c.classList.remove('bg-green-200')); b.classList.add('bg-green-200');};
+  choicesDiv.appendChild(b);
+});
+const startBtn=document.getElementById('startBtn');
+const container=document.getElementById('container');
+let mode='survival', resources=0, life=100;
+document.querySelectorAll('input[name=mode]').forEach(r=>r.onchange=()=>mode=r.value);
+startBtn.onclick=()=>{
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('modeDisplay').textContent=mode;
+  init(); animate();
+};
+let scene,camera,renderer,controls,player;
+const objects=[]; const pickups=[];
+function emojiSprite(symbol){
+  const canvas=document.createElement('canvas');canvas.width=64;canvas.height=64;
+  const ctx=canvas.getContext('2d');ctx.font='48px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(symbol,32,32);
+  const tex=new THREE.CanvasTexture(canvas); const mat=new THREE.SpriteMaterial({map:tex}); return new THREE.Sprite(mat);
+}
+function addPickup(){
+  const ems=['🪵','🌾','🌿','🍯'];
+  const sprite=emojiSprite(ems[Math.floor(Math.random()*ems.length)]);
+  sprite.position.set((Math.random()-0.5)*20,0.5,(Math.random()-0.5)*20);
+  scene.add(sprite); pickups.push(sprite);
+}
+function init(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0xbef7c6);
+  camera=new THREE.PerspectiveCamera(60,container.clientWidth/container.clientHeight,0.1,100);
+  camera.position.set(0,5,10);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(container.clientWidth,container.clientHeight); container.appendChild(renderer.domElement);
+  controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.target.set(0,0,0); controls.enablePan=false; controls.update();
+  const light=new THREE.HemisphereLight(0xffffff,0x444444); scene.add(light);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshLambertMaterial({color:0x7cfc00}));
+  ground.rotation.x=-Math.PI/2; scene.add(ground);
+  player=emojiSprite(chosen); player.position.y=0.5; scene.add(player);
+  for(let i=0;i<10;i++) addPickup();
+  window.addEventListener('resize',()=>{camera.aspect=container.clientWidth/container.clientHeight;camera.updateProjectionMatrix();renderer.setSize(container.clientWidth,container.clientHeight);});
+  renderer.domElement.addEventListener('pointerdown',placeBlock);
+}
+function placeBlock(e){
+  const mouse=new THREE.Vector2((e.offsetX/container.clientWidth)*2-1,-(e.offsetY/container.clientHeight)*2+1);
+  const ray=new THREE.Raycaster(); ray.setFromCamera(mouse,camera);
+  const intersects=ray.intersectObject(scene.children.find(o=>o.geometry instanceof THREE.PlaneGeometry));
+  if(intersects.length){
+    if(mode==='creative'||resources>0){
+      const b=emojiSprite('🌿'); b.position.copy(intersects[0].point); b.position.y=0.5; scene.add(b); objects.push(b);
+      if(mode==='survival'){resources--; document.getElementById('resources').textContent=resources;}
+    }
+  }
+}
+function animate(){
+  requestAnimationFrame(animate);
+  pickups.forEach((p,i)=>{
+    if(p.position.distanceTo(player.position)<1){ scene.remove(p); pickups.splice(i,1); resources++; document.getElementById('resources').textContent=resources; addPickup(); }
+  });
+  renderer.render(scene,camera);
+}
+</script>
+<script>
+document.querySelector('.menu-button').addEventListener('click',()=>{document.querySelector('nav').classList.toggle('open');});
+document.querySelector('#darkToggle').addEventListener('click',()=>{document.body.classList.toggle('dark-mode');});
+</script>
+</body>
+</html>
