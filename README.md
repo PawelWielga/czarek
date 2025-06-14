@@ -11,3 +11,4 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Emotech Park** (`emotech.html`)
 - **Roślinna Wybieranka** (`roslinna.html`)
 - **Kolonia Nad LiPau** (`kolonia.html`)
+- **Kropki.io** (`kropki.html`)
