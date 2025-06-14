@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Opis strony Czarka">
+    <meta property="og:title" content="Czarek - strona">
+    <meta property="og:image" content="url-do-obrazka.jpg">
+    <title>Roślinna Wybieranka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --main-color: #065f46;
+            --bg-color: #f0fdf4;
+        }
+        html { scroll-behavior: smooth; }
+        body { background-color: var(--bg-color); color: var(--main-color); }
+        body.dark-mode { background-color: #111; color: #fff; }
+        nav ul { display: none; }
+        nav.open ul { display: block; }
+        @media(min-width: 640px) {
+            nav ul { display: flex; }
+            .menu-button { display: none; }
+        }
+        button:hover { transform: scale(1.05); transition: transform 0.2s; }
+        .option-btn { font-size: 2rem; }
+        .selected { background-color: #bbf7d0; }
+    </style>
+</head>
+<body>
+    <header class="bg-green-700 text-white">
+        <nav class="container mx-auto flex items-center justify-between p-4">
+            <a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+            <button class="menu-button" aria-label="Otwórz menu">☰</button>
+            <ul class="flex space-x-4 text-sm">
+                <li><a href="ewolucja.html" class="hover:underline">Stworzydło</a></li>
+                <li><a href="kaktusy.html" class="hover:underline">Kaktusy</a></li>
+                <li><a href="slither.html" class="hover:underline">Wąż</a></li>
+                <li><a href="roslinna.html" class="hover:underline">Wybieranka</a></li>
+            </ul>
+            <button id="darkToggle">Przełącz tryb</button>
+        </nav>
+    </header>
+    <main class="container mx-auto p-8 space-y-6">
+        <h1 class="text-3xl font-bold">Roślinna Wybieranka</h1>
+        <img src="https://via.placeholder.com/150" loading="lazy" alt="Rysunek Czarka" class="mx-auto">
+        <section class="space-y-4" id="game">
+            <div>
+                <h2 class="text-xl font-semibold">1. Wybierz roślinę</h2>
+                <div id="plants" class="grid grid-cols-6 gap-2"></div>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold">2. Wybierz kolor</h2>
+                <div id="colors" class="grid grid-cols-6 gap-2"></div>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold">3. Wybierz miejsce zamieszkania</h2>
+                <div id="places" class="grid grid-cols-6 gap-2"></div>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold">4. Wybierz jedzenie</h2>
+                <div id="foods" class="grid grid-cols-6 gap-2"></div>
+            </div>
+            <button id="show" class="mt-4 px-4 py-2 bg-green-700 text-white rounded disabled:opacity-50" disabled>Pokaż moją roślinę</button>
+            <div id="summary" class="text-lg font-medium mt-4"></div>
+            <button id="reset" class="mt-2 px-4 py-2 bg-gray-300 rounded hidden">Zagraj jeszcze raz</button>
+        </section>
+    </main>
+    <footer class="mt-8 text-center text-sm text-green-600">
+        <p>&copy; 2024 Gry Czarka</p>
+    </footer>
+    <script>
+        const plants = ['🌵','🌻','🌱','🍄','🌸','🪴'];
+        const colors = ['🟢','🟡','🟣','🔴','🔵','⚪'];
+        const places = ['🏞️','🪵','🏔️','🏝️','🏜️','📦'];
+        const foods = ['☀️','🌧️','🌫️','🪱','🍕','💨'];
+        const data = {plant:null,color:null,place:null,food:null};
+
+        function createOptions(arr, container, key){
+            arr.forEach(val => {
+                const btn = document.createElement('button');
+                btn.textContent = val;
+                btn.className = 'option-btn p-2 border-2 border-green-700 rounded hover:bg-green-100';
+                btn.addEventListener('click', () => {
+                    [...container.children].forEach(c => c.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    data[key] = val;
+                    checkReady();
+                });
+                container.appendChild(btn);
+            });
+        }
+        createOptions(plants, document.getElementById('plants'), 'plant');
+        createOptions(colors, document.getElementById('colors'), 'color');
+        createOptions(places, document.getElementById('places'), 'place');
+        createOptions(foods, document.getElementById('foods'), 'food');
+
+        const showBtn = document.getElementById('show');
+        const summary = document.getElementById('summary');
+        const resetBtn = document.getElementById('reset');
+
+        function checkReady(){
+            showBtn.disabled = !(data.plant && data.color && data.place && data.food);
+        }
+
+        showBtn.addEventListener('click', () => {
+            summary.textContent = `Twoja roślina to ${data.plant} w kolorze ${data.color}, mieszka w ${data.place} i żywi się ${data.food}.`;
+            resetBtn.classList.remove('hidden');
+            showBtn.disabled = true;
+        });
+
+        resetBtn.addEventListener('click', () => {
+            Object.keys(data).forEach(k => data[k] = null);
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            summary.textContent = '';
+            resetBtn.classList.add('hidden');
+            showBtn.disabled = true;
+        });
+    </script>
+    <script>
+        document.querySelector('.menu-button').addEventListener('click', () => {
+            document.querySelector('nav').classList.toggle('open');
+        });
+        document.querySelector('#darkToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+    </script>
+</body>
+</html>
