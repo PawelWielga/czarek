@@ -134,7 +134,7 @@ function startGame() {
     document.addEventListener('keydown', jump);
     jumpBtn.addEventListener('click', jump);
     function jump(e){
-        if(e.code==='Space' && parseInt(dino.style.bottom)===0){
+        if((e.code==='Space' || e.type==='click') && parseInt(dino.style.bottom)===0){
             vy = 15;
         }
     }

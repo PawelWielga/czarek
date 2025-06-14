@@ -111,11 +111,11 @@ function startGame(){
  document.addEventListener('keydown',jump);
  game.addEventListener('pointerdown',jump);
  jumpBtn.addEventListener('click',jump);
- function jump(e){
-   if((e.code==='Space'||e.type==='pointerdown') && parseInt(player.style.bottom)<=40){
-     vy=12;
-   }
- }
+  function jump(e){
+    if((e.code==='Space'||e.type==='pointerdown'||e.type==='click') && parseInt(player.style.bottom)<=40){
+      vy=12;
+    }
+  }
  function tick(){
    if(vy>0||parseInt(player.style.bottom)>40){
      player.style.bottom=(parseInt(player.style.bottom)||40)+vy+'px';
