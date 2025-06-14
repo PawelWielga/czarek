@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotech Park</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --main-color:#065f46; --bg-color:#f0fdf4; }
+        body { background:var(--bg-color); color:var(--main-color); }
+        body.dark-mode { background:#111; color:#fff; }
+        nav ul { display:none; }
+        nav.open ul { display:block; }
+        @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
+        button:hover{ transform:scale(1.05); transition:transform .2s; }
+        #map div{ width:40px; height:40px; }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+<header class="bg-green-700 text-white w-full">
+    <nav class="container mx-auto flex items-center justify-between p-4">
+        <a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+        <button class="menu-button" aria-label="Otwórz menu">☰</button>
+        <ul class="flex space-x-4 text-sm">
+            <li><a href="ewolucja.html" class="hover:underline">Stworzydło</a></li>
+            <li><a href="kaktusy.html" class="hover:underline">Kaktusy</a></li>
+            <li><a href="slither.html" class="hover:underline">Wąż</a></li>
+            <li><a href="roslinna.html" class="hover:underline">Wybieranka</a></li>
+        </ul>
+        <button id="darkToggle">Przełącz tryb</button>
+    </nav>
+</header>
+<main class="container mx-auto p-4 space-y-4 flex flex-col items-center">
+    <h1 class="text-3xl font-bold">Emotech Park</h1>
+    <div id="start" class="space-y-4 text-center">
+        <h2 class="text-xl font-semibold">Wybierz postać</h2>
+        <div id="chars" class="flex gap-4 text-4xl"></div>
+    </div>
+    <div id="game" class="hidden space-y-2">
+        <div id="hud" class="flex justify-between w-full text-2xl">
+            <div id="lives">❤️❤️❤️</div>
+            <div id="bag">🎒: -</div>
+        </div>
+        <div id="map" class="grid grid-cols-5 gap-1 text-2xl select-none"></div>
+        <div id="controls" class="flex space-x-2 justify-center">
+            <button id="up" class="px-2">⬆️</button>
+            <div class="flex space-x-2">
+                <button id="left" class="px-2">⬅️</button>
+                <button id="down" class="px-2">⬇️</button>
+                <button id="right" class="px-2">➡️</button>
+            </div>
+        </div>
+    </div>
+    <div id="over" class="mt-4 text-center space-y-4 hidden">
+        <h2 class="text-4xl text-red-600 font-bold">GAME OVER</h2>
+        <button id="again" class="px-4 py-2 bg-green-700 text-white rounded">Spróbuj ponownie!</button>
+    </div>
+</main>
+<footer class="mt-8 text-center text-sm text-green-600 w-full">
+    <p>&copy; 2024 Gry Czarka</p>
+</footer>
+<script>
+const charOpts=['🐸','😺','🧸'];
+const charsDiv=document.getElementById('chars');
+let playerEmoji=null;
+charOpts.forEach(c=>{
+  const b=document.createElement('button');
+  b.textContent=c;
+  b.className='p-2 border-2 border-green-700 rounded hover:bg-green-100';
+  b.onclick=()=>{playerEmoji=c;startGame();};
+  charsDiv.appendChild(b);
+});
+const mapDiv=document.getElementById('map');
+const livesDiv=document.getElementById('lives');
+const bagDiv=document.getElementById('bag');
+const overDiv=document.getElementById('over');
+const againBtn=document.getElementById('again');
+const gameDiv=document.getElementById('game');
+let hearts,playerPos,heldItem;
+const terrain=[[0,0,1,0,0],[0,2,4,2,0],[3,4,4,4,3],[0,2,4,2,0],[0,0,1,0,0]];
+const terrainEmojis=['🌿','🌳','🪑','💧',''];
+const npcs=[{x:2,y:2,e:'🐭',want:'🍎'},{x:4,y:1,e:'🦋',want:'🎈'},{x:0,y:3,e:'🐰',want:'🎁'}];
+let items=[{x:1,y:1,e:'🍎'},{x:3,y:3,e:'🎁'},{x:4,y:3,e:'🎈'}];
+function render(){
+  mapDiv.innerHTML='';
+  for(let y=0;y<5;y++){
+    for(let x=0;x<5;x++){
+      const cell=document.createElement('div');
+      cell.className='flex items-center justify-center border border-green-700 bg-white';
+      cell.dataset.x=x;cell.dataset.y=y;
+      cell.textContent=terrainEmojis[terrain[y][x]]||'';
+      const npc=npcs.find(n=>n.x===x&&n.y===y);
+      const item=items.find(i=>i.x===x&&i.y===y);
+      if(item) cell.textContent=item.e;
+      if(npc) cell.textContent=npc.e;
+      if(playerPos.x===x&&playerPos.y===y) cell.textContent=playerEmoji;
+      cell.onclick=()=>interact(x,y);
+      mapDiv.appendChild(cell);
+    }
+  }
+  bagDiv.textContent='🎒: '+(heldItem||'-');
+  livesDiv.textContent='❤️'.repeat(hearts);
+}
+function startGame(){
+  document.getElementById('start').classList.add('hidden');
+  overDiv.classList.add('hidden');
+  gameDiv.classList.remove('hidden');
+  hearts=3;heldItem=null;playerPos={x:2,y:4};
+  render();
+}
+function move(dx,dy){
+  const nx=playerPos.x+dx,ny=playerPos.y+dy;
+  if(nx<0||ny<0||nx>4||ny>4)return;
+  playerPos={x:nx,y:ny};
+  const itemIndex=items.findIndex(i=>i.x===nx&&i.y===ny);
+  if(itemIndex>-1){heldItem=items[itemIndex].e;items.splice(itemIndex,1);}
+  render();
+}
+function interact(x,y){
+  const npc=npcs.find(n=>n.x===x&&n.y===y);
+  if(npc){
+    if(heldItem===npc.want){
+      heldItem=null;
+      bubble(npc.e,'Dziękuję!');
+    }else{
+      hearts--;bubble(npc.e,npc.want+'❓');
+      if(hearts<=0) return gameOver();
+    }
+  }
+  render();
+}
+function bubble(who,msg){
+  const div=document.createElement('div');
+  div.textContent='💬'+who+': '+msg;
+  div.className='absolute bg-white border border-green-700 rounded p-2 text-xl';
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),1500);
+}
+function gameOver(){
+  gameDiv.classList.add('hidden');
+  overDiv.classList.remove('hidden');
+}
+againBtn.onclick=()=>{startGame();};
+['up','down','left','right'].forEach(id=>{
+  document.getElementById(id).onclick=()=>{
+    if(id==='up')move(0,-1);
+    if(id==='down')move(0,1);
+    if(id==='left')move(-1,0);
+    if(id==='right')move(1,0);
+  };
+});
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowUp')move(0,-1);
+  if(e.key==='ArrowDown')move(0,1);
+  if(e.key==='ArrowLeft')move(-1,0);
+  if(e.key==='ArrowRight')move(1,0);
+});
+</script>
+<script>
+document.querySelector('.menu-button').addEventListener('click',()=>{document.querySelector('nav').classList.toggle('open');});
+document.querySelector('#darkToggle').addEventListener('click',()=>{document.body.classList.toggle('dark-mode');});
+</script>
+</body>
+</html>
