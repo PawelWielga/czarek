@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Opis strony Czarka">
+    <meta property="og:title" content="Czarek - strona">
+    <meta property="og:image" content="url-do-obrazka.jpg">
+    <title>Wąż (Slither.io)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --main-color: #065f46;
+            --bg-color: #f0fdf4;
+        }
+        html { scroll-behavior: smooth; }
+        body { background-color: var(--bg-color); color: var(--main-color); }
+        body.dark-mode { background-color: #111; color: #fff; }
+        nav ul { display: none; }
+        nav.open ul { display: block; }
+        @media(min-width: 640px) {
+            nav ul { display: flex; }
+            .menu-button { display: none; }
+        }
+        button:hover { transform: scale(1.05); transition: transform 0.2s; }
+        #board { touch-action: none; }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+    <header class="bg-green-700 text-white w-full">
+        <nav class="container mx-auto flex items-center justify-between p-4">
+            <a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+            <button class="menu-button" aria-label="Otwórz menu">☰</button>
+            <ul class="flex space-x-4 text-sm">
+                <li><a href="ewolucja.html" class="hover:underline">Stworzydło</a></li>
+                <li><a href="kaktusy.html" class="hover:underline">Kaktusy</a></li>
+                <li><a href="slither.html" class="underline">Wąż</a></li>
+            </ul>
+            <button id="darkToggle">Przełącz tryb</button>
+        </nav>
+    </header>
+    <main class="container mx-auto p-8 space-y-4 flex flex-col items-center">
+        <h1 class="text-3xl font-bold">Wąż (Slither.io)</h1>
+        <img src="https://via.placeholder.com/150" loading="lazy" alt="Rysunek Czarka" class="mx-auto">
+        <div class="text-lg">Punkty: <span id="score">0</span></div>
+        <canvas id="board" width="600" height="400" class="border-2 border-green-700 bg-white"></canvas>
+        <div id="over" class="mt-4 text-center space-y-4 hidden">
+            <h2 class="text-4xl text-red-600 font-bold">KONIEC</h2>
+            <button id="again" class="px-4 py-2 bg-green-700 text-white rounded">Zagraj ponownie</button>
+        </div>
+    </main>
+    <footer class="mt-8 text-center text-sm text-green-600 w-full">
+        <p>&copy; 2024 Gry Czarka</p>
+    </footer>
+<script>
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const overDiv = document.getElementById('over');
+const againBtn = document.getElementById('again');
+let width = canvas.width;
+let height = canvas.height;
+const size = 10;
+let snake, dir, speed, food, running, points;
+
+function spawnFood(){
+    return {x: Math.random()*width, y: Math.random()*height};
+}
+
+function reset(){
+    snake = [{x: width/2, y: height/2}];
+    dir = 0;
+    speed = 2;
+    food = spawnFood();
+    running = true;
+    points = 0;
+    scoreEl.textContent = '0';
+    overDiv.classList.add('hidden');
+}
+
+function update(){
+    if(!running) return;
+    const head = {x: snake[0].x + Math.cos(dir)*speed, y: snake[0].y + Math.sin(dir)*speed};
+    if(head.x < 0) head.x += width;
+    if(head.x > width) head.x -= width;
+    if(head.y < 0) head.y += height;
+    if(head.y > height) head.y -= height;
+    snake.unshift(head);
+    if(Math.hypot(head.x - food.x, head.y - food.y) < size){
+        points++;
+        scoreEl.textContent = points;
+        food = spawnFood();
+    } else {
+        snake.pop();
+    }
+    for(let i=1;i<snake.length;i++){
+        if(Math.hypot(head.x - snake[i].x, head.y - snake[i].y) < size/2){
+            running = false;
+            overDiv.classList.remove('hidden');
+            break;
+        }
+    }
+}
+
+function draw(){
+    ctx.clearRect(0,0,width,height);
+    ctx.fillStyle = '#ecfdf5';
+    ctx.fillRect(0,0,width,height);
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(food.x, food.y, size/2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#10b981';
+    for(const s of snake){
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, size/2, 0, Math.PI*2);
+        ctx.fill();
+    }
+}
+
+function loop(){
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+function setDirection(x,y){
+    const head = snake[0];
+    dir = Math.atan2(y - head.y, x - head.x);
+}
+
+window.addEventListener('keydown', e => {
+    if(e.key === 'ArrowLeft') dir -= Math.PI/18;
+    if(e.key === 'ArrowRight') dir += Math.PI/18;
+});
+
+function handlePointer(e){
+    const rect = canvas.getBoundingClientRect();
+    setDirection(e.clientX - rect.left, e.clientY - rect.top);
+}
+canvas.addEventListener('pointerdown', handlePointer);
+canvas.addEventListener('pointermove', e => {
+    if(e.pressure>0) handlePointer(e);
+});
+
+againBtn.onclick = reset;
+
+reset();
+loop();
+</script>
+<script>
+    document.querySelector('.menu-button').addEventListener('click', () => {
+        document.querySelector('nav').classList.toggle('open');
+    });
+    document.querySelector('#darkToggle').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+    });
+</script>
+</body>
+</html>
