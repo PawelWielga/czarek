@@ -64,6 +64,7 @@
             <button id="show" class="mt-4 px-4 py-2 bg-green-700 text-white rounded disabled:opacity-50" disabled>Pokaż moją roślinę</button>
             <div id="summary" class="text-lg font-medium mt-4"></div>
             <button id="reset" class="mt-2 px-4 py-2 bg-gray-300 rounded hidden">Zagraj jeszcze raz</button>
+            <div id="gallery" class="mt-4 space-y-1"></div>
         </section>
     </main>
     <footer class="mt-8 text-center text-sm text-green-600">
@@ -98,13 +99,24 @@
         const showBtn = document.getElementById('show');
         const summary = document.getElementById('summary');
         const resetBtn = document.getElementById('reset');
+        const gallery = document.getElementById('gallery');
+        const history = JSON.parse(localStorage.getItem('plantsHistory') || '[]');
+
+        function renderGallery(){
+            gallery.innerHTML = history.map(h => `<div>${h}</div>`).join('');
+        }
+        renderGallery();
 
         function checkReady(){
             showBtn.disabled = !(data.plant && data.color && data.place && data.food);
         }
 
         showBtn.addEventListener('click', () => {
-            summary.textContent = `Twoja roślina to ${data.plant} w kolorze ${data.color}, mieszka w ${data.place} i żywi się ${data.food}.`;
+            const text = `Twoja roślina to ${data.plant} w kolorze ${data.color}, mieszka w ${data.place} i żywi się ${data.food}.`;
+            summary.textContent = text;
+            history.push(text);
+            localStorage.setItem('plantsHistory', JSON.stringify(history));
+            renderGallery();
             resetBtn.classList.remove('hidden');
             showBtn.disabled = true;
         });
