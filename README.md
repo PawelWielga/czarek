@@ -9,3 +9,4 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Ocean.io** (`ocean.html`)
 - **Weather.io** (`weather.html`)
 - **Roślinna Wybieranka** (`roslinna.html`)
+- **Kolonia Nad LiPau** (`kolonia.html`)
