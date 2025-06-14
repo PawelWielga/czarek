@@ -27,7 +27,8 @@
     <style>
         #game {
             position: relative;
-            width: 600px;
+            width: 100%;
+            max-width: 600px;
             height: 200px;
             border: 2px solid #065f46;
             overflow: hidden;
@@ -72,6 +73,7 @@
         <div id="game" class="hidden mt-4">
             <span id="distance" class="absolute top-1 left-1 text-sm"></span>
         </div>
+        <button id="jumpBtn" class="mt-2 px-4 py-2 bg-green-700 text-white rounded hidden">Skocz</button>
         <div id="over" class="mt-4 text-center space-y-4">
             <h2 class="text-4xl text-red-600 font-bold">GAME OVER</h2>
             <button id="again" class="px-4 py-2 bg-green-700 text-white rounded">Zagraj jeszcze raz</button>
@@ -96,6 +98,7 @@ let gameInterval, cactusInterval, distance=0;
 const game = document.getElementById('game');
 const over = document.getElementById('over');
 const distSpan = document.getElementById('distance');
+const jumpBtn = document.getElementById('jumpBtn');
 
 function checkCollision(a, b) {
     const ar = a.getBoundingClientRect();
@@ -116,6 +119,7 @@ function startGame() {
     document.getElementById('choose').classList.add('hidden');
     game.classList.remove('hidden');
     over.style.display='none';
+    jumpBtn.classList.remove('hidden');
     distance = 0;
     distSpan.textContent = '0';
     const dino = document.createElement('span');
@@ -128,6 +132,7 @@ function startGame() {
     game.appendChild(distSpan);
     game.appendChild(dino);
     document.addEventListener('keydown', jump);
+    jumpBtn.addEventListener('click', jump);
     function jump(e){
         if(e.code==='Space' && parseInt(dino.style.bottom)===0){
             vy = 15;
@@ -159,12 +164,18 @@ function startGame() {
         c.style.left = '580px';
         game.appendChild(c);
     }
+    function scheduleSpawn(){
+        spawn();
+        cactusInterval = setTimeout(scheduleSpawn, 2500 + Math.random()*1000);
+    }
     gameInterval = setInterval(tick,50);
-    cactusInterval = setInterval(spawn,1700);
+    scheduleSpawn();
     function endGame(){
         clearInterval(gameInterval);
-        clearInterval(cactusInterval);
+        clearTimeout(cactusInterval);
         document.removeEventListener('keydown', jump);
+        jumpBtn.removeEventListener('click', jump);
+        jumpBtn.classList.add('hidden');
         over.style.display='block';
     }
     document.getElementById('again').onclick = () => {
