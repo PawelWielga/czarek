@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kolorowa gra w stylu Agar.io o zjawiskach pogodowych">
+    <title>Weather.io</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --main-color: #065f46; --bg-color: #f0fdf4; }
+        body { background-color: var(--bg-color); color: var(--main-color); }
+        body.dark-mode { background-color: #111; color: #fff; }
+        nav ul { display: none; }
+        nav.open ul { display: block; }
+        @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
+        button:hover{ transform:scale(1.05); transition:transform .2s; }
+        #game{ touch-action:none; border:2px solid #065f46; background:#ecfdf5; }
+        #over{ display:none; }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+<header class="bg-green-700 text-white w-full">
+    <nav class="container mx-auto flex items-center justify-between p-4">
+        <a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+        <button class="menu-button" aria-label="Otwórz menu">☰</button>
+        <ul class="flex space-x-4 text-sm">
+            <li><a href="ewolucja.html" class="hover:underline">Stworzydło</a></li>
+            <li><a href="kaktusy.html" class="hover:underline">Kaktusy</a></li>
+            <li><a href="slither.html" class="hover:underline">Wąż</a></li>
+            <li><a href="ocean.html" class="hover:underline">Ocean.io</a></li>
+            <li><a href="roslinna.html" class="hover:underline">Wybieranka</a></li>
+        </ul>
+        <button id="darkToggle">Przełącz tryb</button>
+    </nav>
+</header>
+<main class="container mx-auto p-8 space-y-4 flex flex-col items-center">
+    <h1 class="text-4xl font-bold">Weather.io</h1>
+    <div id="start" class="space-y-4 text-center">
+        <h2 class="text-xl font-semibold">Wybierz żywioł</h2>
+        <div id="elements" class="flex gap-4 justify-center text-4xl"></div>
+        <button id="play" class="px-4 py-2 bg-green-700 text-white rounded disabled:opacity-50" disabled>Graj</button>
+    </div>
+    <div id="score" class="text-lg hidden">Punkty: <span id="points">0</span></div>
+    <canvas id="game" width="600" height="400" class="hidden w-full max-w-lg"></canvas>
+    <div id="over" class="mt-4 text-center space-y-4">
+        <h2 class="text-4xl text-red-600 font-bold">KONIEC GRY</h2>
+        <button id="again" class="px-4 py-2 bg-green-700 text-white rounded">Zagraj ponownie</button>
+    </div>
+</main>
+<footer id="foot" class="mt-8 text-center text-sm text-green-600 w-full">
+    <p>&copy; 2024 Gry Czarka</p>
+</footer>
+<script>
+const elements=[
+  {emoji:'\uD83D\uDD25',color:'#f87171'}, // 🔥
+  {emoji:'\uD83C\uDF0A',color:'#60a5fa'}, // 🌊
+  {emoji:'\uD83D\uDCA8',color:'#fcd34d'}, // 💨
+  {emoji:'\u2744\uFE0F',color:'#a5f3fc'}  // ❄️
+];
+const foodsEm=['\u2601\uFE0F','\uD83D\uDCA7','\u2728','\u2744\uFE0F']; // ☁️,💧,✨,❄️
+const elemDiv=document.getElementById('elements');
+let chosen=null;
+elements.forEach(el=>{
+  const b=document.createElement('button');
+  b.textContent=el.emoji;
+  b.className='p-2 border-2 border-green-700 rounded hover:bg-green-100';
+  b.onclick=()=>{chosen=el;document.getElementById('play').disabled=false;[...elemDiv.children].forEach(c=>c.classList.remove('bg-green-200'));b.classList.add('bg-green-200');};
+  elemDiv.appendChild(b);
+});
+const canvas=document.getElementById('game');
+const ctx=canvas.getContext('2d');
+const w=canvas.width, h=canvas.height;
+let player,foods=[],enemies=[],running=false,points=0,target={x:w/2,y:h/2},loopId,foodT,enemyT;
+function spawnFood(){
+  const r=5+Math.random()*5;
+  foods.push({x:Math.random()*w,y:Math.random()*h,r,dx:Math.random()*1-0.5,dy:Math.random()*1-0.5,emoji:foodsEm[Math.floor(Math.random()*foodsEm.length)]});
+  foodT=setTimeout(spawnFood,1000);
+}
+function spawnEnemy(){
+  const r=15+Math.random()*25;
+  const e=elements[Math.floor(Math.random()*elements.length)];
+  enemies.push({x:Math.random()*w,y:Math.random()*h,r,dx:Math.random()*1-0.5,dy:Math.random()*1-0.5,emoji:e.emoji,color:e.color});
+  enemyT=setTimeout(spawnEnemy,4000);
+}
+function startGame(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('score').classList.remove('hidden');
+  canvas.classList.remove('hidden');
+  document.getElementById('over').style.display='none';
+  document.getElementById('foot').style.background='lightblue';
+  points=0; document.getElementById('points').textContent='0';
+  player={x:w/2,y:h/2,r:20,color:chosen.color,emoji:chosen.emoji};
+  foods=[]; enemies=[]; running=true;
+  spawnFood(); spawnEnemy();
+  loopId=requestAnimationFrame(loop);
+}
+function endGame(){
+  running=false;
+  clearTimeout(foodT); clearTimeout(enemyT);
+  cancelAnimationFrame(loopId);
+  document.getElementById('over').style.display='block';
+}
+function bounce(o){
+  if(o.x<o.r||o.x>w-o.r) o.dx*=-1;
+  if(o.y<o.r||o.y>h-o.r) o.dy*=-1;
+}
+function collides(a,b){
+  return Math.hypot(a.x-b.x,a.y-b.y)<a.r+b.r;
+}
+canvas.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();target.x=e.clientX-r.left;target.y=e.clientY-r.top;});
+function update(){
+  const sp=2;
+  const ang=Math.atan2(target.y-player.y,target.x-player.x);
+  player.x+=Math.cos(ang)*sp;
+  player.y+=Math.sin(ang)*sp;
+  player.x=Math.max(player.r,Math.min(w-player.r,player.x));
+  player.y=Math.max(player.r,Math.min(h-player.r,player.y));
+  foods.forEach((f,i)=>{
+    f.x+=f.dx; f.y+=f.dy; bounce(f);
+    if(collides(player,f)){
+      foods.splice(i,1); points++; player.r+=0.5; document.getElementById('points').textContent=points;
+    }
+  });
+  enemies.forEach((e,i)=>{
+    e.x+=e.dx; e.y+=e.dy; bounce(e);
+    if(collides(player,e)){
+      if(player.r>e.r){ player.r+=e.r*0.2; points+=5; enemies.splice(i,1); }
+      else{ endGame(); }
+    }
+  });
+}
+function drawCircle(o){
+  ctx.fillStyle=o.color||'#ffffff';
+  ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fill();
+  ctx.font=o.r+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(o.emoji,o.x,o.y+1);
+}
+function draw(){
+  ctx.clearRect(0,0,w,h);
+  foods.forEach(drawCircle);
+  enemies.forEach(drawCircle);
+  drawCircle(player);
+}
+function loop(){
+  if(running){update();draw();loopId=requestAnimationFrame(loop);} }
+
+document.getElementById('play').onclick=startGame;
+document.getElementById('again').onclick=startGame;
+</script>
+<script>
+document.querySelector('.menu-button').addEventListener('click',()=>{document.querySelector('nav').classList.toggle('open');});
+document.querySelector('#darkToggle').addEventListener('click',()=>{document.body.classList.toggle('dark-mode');});
+</script>
+</body>
+</html>
