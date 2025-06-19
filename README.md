@@ -12,3 +12,4 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Roślinna Wybieranka** (`roslinna.html`)
 - **Kolonia Nad LiPau** (`kolonia.html`)
 - **Kropki.io** (`kropki.html`)
+- **Evolution Game** (`evolution-game.html`)
