@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolution Game</title>
+<style>
+body{font-family:sans-serif;text-align:center;background:#eef;margin:0}
+#setup{padding:20px}
+#game{display:none;position:relative;width:400px;height:300px;margin:10px auto;background:#ddf;border:2px solid #555}
+#mobileControls{display:none;position:absolute;bottom:5px;left:0;right:0;text-align:center}
+#mobileControls button{width:50px;height:50px;margin:2px;font-size:20px}
+#upgrade{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);color:#fff;justify-content:center;align-items:center;flex-direction:column}
+#upgrade button{margin:5px;padding:5px 10px;font-size:16px}
+#score{margin-top:10px;font-size:18px}
+#hearts{font-size:20px;margin-bottom:5px}
+canvas{width:100%;height:100%;touch-action:none}
+</style>
+</head>
+<body>
+<div id="setup">
+<h1>Evolution Game</h1>
+<div>
+<label>Shape:
+<select id="shapeSel">
+<option value="bacteria">bacteria</option>
+<option value="rabbit">rabbit</option>
+<option value="turtle">turtle</option>
+</select>
+</label>
+</div>
+<div>
+<label>Color:
+<select id="colorSel">
+<option value="blue">blue</option>
+<option value="green">green</option>
+<option value="red">red</option>
+</select>
+</label>
+</div>
+<div>
+<label>Ability:
+<select id="abilitySel">
+<option value="fast">fast movement</option>
+<option value="regen">regeneration</option>
+<option value="poison">poison spikes</option>
+</select>
+</label>
+</div>
+<button id="startBtn">Start</button>
+</div>
+<div id="game">
+<canvas id="board" width="400" height="300"></canvas>
+<div id="mobileControls">
+<button id="up">⬆️</button><br>
+<button id="left">⬅️</button>
+<button id="down">⬇️</button>
+<button id="right">➡️</button>
+</div>
+<div id="upgrade">
+<p>Choose new ability</p>
+<button data-ability="fast">fast movement</button>
+<button data-ability="regen">regeneration</button>
+<button data-ability="poison">poison spikes</button>
+</div>
+</div>
+<div id="score">Score: 0</div>
+<div id="hearts">❤️❤️❤️</div>
+<script>
+const canvas=document.getElementById('board');
+const ctx=canvas.getContext('2d');
+const shapeSel=document.getElementById('shapeSel');
+const colorSel=document.getElementById('colorSel');
+const abilitySel=document.getElementById('abilitySel');
+const startBtn=document.getElementById('startBtn');
+const scoreDiv=document.getElementById('score');
+const heartsDiv=document.getElementById('hearts');
+const mobile=document.getElementById('mobileControls');
+const upgradeDiv=document.getElementById('upgrade');
+let player,foods,hazards,keys={},score=0,nextUpgrade=5,loopId,regenInt;
+const width=canvas.width,height=canvas.height;
+const shapes={bacteria:'🦠',rabbit:'🐰',turtle:'🐢'};
+function randX(){return Math.random()*width}
+function randY(){return Math.random()*height}
+function updateHearts(){heartsDiv.textContent=''.padStart(player.hearts,'❤️')}
+function updateScore(){scoreDiv.textContent='Score: '+score}
+function startGame(){
+ player={x:width/2,y:height/2,size:15,color:colorSel.value,shape:shapeSel.value,ability:abilitySel.value,hearts:3};
+ foods=Array.from({length:5},()=>({x:randX(),y:randY()}));
+ hazards=Array.from({length:3},()=>({x:randX(),y:randY(),vx:Math.random()*2-1,vy:Math.random()*2-1}));
+ score=0;nextUpgrade=5;updateScore();updateHearts();
+ document.getElementById('setup').style.display='none';
+ document.getElementById('game').style.display='block';
+ if(navigator.maxTouchPoints>0) mobile.style.display='block';
+ if(player.ability==='regen') regenInt=setInterval(()=>{if(player.hearts<3){player.hearts++;updateHearts();}},3000);
+ loop();
+}
+startBtn.onclick=startGame;
+['left','right','up','down'].forEach(id=>{
+ const btn=document.getElementById(id);
+ if(btn){btn.addEventListener('touchstart',()=>{keys['Arrow'+id.charAt(0).toUpperCase()+id.slice(1)]=true});
+ btn.addEventListener('touchend',()=>{keys['Arrow'+id.charAt(0).toUpperCase()+id.slice(1)]=false});}
+});
+window.addEventListener('keydown',e=>{keys[e.key]=true});
+window.addEventListener('keyup',e=>{keys[e.key]=false});
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function showUpgrade(){
+ upgradeDiv.style.display='flex';
+}
+upgradeDiv.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+ player.ability=b.dataset.ability;
+ upgradeDiv.style.display='none';
+ if(regenInt){clearInterval(regenInt);regenInt=null;}
+ if(player.ability==='regen') regenInt=setInterval(()=>{if(player.hearts<3){player.hearts++;updateHearts();}},3000);
+});
+function movePlayer(){
+ const sp=player.ability==='fast'?3:2;
+ if(keys.ArrowLeft) player.x-=sp;
+ if(keys.ArrowRight) player.x+=sp;
+ if(keys.ArrowUp) player.y-=sp;
+ if(keys.ArrowDown) player.y+=sp;
+ if(player.x<0)player.x=0;if(player.x>width)player.x=width;
+ if(player.y<0)player.y=0;if(player.y>height)player.y=height;
+}
+function update(){
+ movePlayer();
+ hazards.forEach(h=>{h.x+=h.vx;h.y+=h.vy;if(h.x<0||h.x>width)h.vx*=-1;if(h.y<0||h.y>height)h.vy*=-1;});
+ foods.forEach(f=>{if(dist(player,f)<player.size+5){score++;updateScore();f.x=randX();f.y=randY();if(score>=nextUpgrade){showUpgrade();nextUpgrade+=5;}}});
+ hazards.forEach(h=>{if(dist(player,h)<player.size+8){
+ if(player.ability==='poison'){h.x=randX();h.y=randY();h.vx=Math.random()*2-1;h.vy=Math.random()*2-1;}
+ else{player.hearts--;updateHearts();h.x=randX();h.y=randY();if(player.hearts<=0) {gameOver();}}
+ }});
+}
+function draw(){
+ ctx.fillStyle='#b3e5fc';ctx.fillRect(0,0,width,height);
+ ctx.fillStyle='#74c69d';for(let i=0;i<5;i++){ctx.fillRect(i*80,height-15,10,15)}
+ ctx.fillStyle='yellow';foods.forEach(f=>{ctx.beginPath();ctx.arc(f.x,f.y,5,0,Math.PI*2);ctx.fill()});
+ ctx.fillStyle='red';hazards.forEach(h=>{ctx.beginPath();ctx.arc(h.x,h.y,8,0,Math.PI*2);ctx.fill()});
+ ctx.fillStyle=player.color;ctx.beginPath();ctx.arc(player.x,player.y,player.size,0,Math.PI*2);ctx.fill();
+ ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#000';ctx.fillText(shapes[player.shape],player.x,player.y);
+}
+function loop(){
+ update();
+ draw();
+ loopId=requestAnimationFrame(loop);
+}
+function gameOver(){
+ cancelAnimationFrame(loopId);if(regenInt)clearInterval(regenInt);
+ alert('Game over! Score: '+score);
+ location.reload();
+}
+</script>
+</body>
+</html>
