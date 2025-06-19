@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gra">
+    <title>Memory Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --main-color:#065f46; --bg-color:#f0fdf4; }
+        html { scroll-behavior:smooth; }
+        body{ background-color:var(--bg-color); color:var(--main-color); }
+        body.dark-mode{ background-color:#111; color:#fff; }
+        nav ul{ display:none; }
+        nav.open ul{ display:block; }
+        @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
+        button:hover{ transform:scale(1.05); transition:transform 0.2s; }
+    </style>
+</head>
+<body>
+<header class="bg-green-700 text-white">
+<nav class="container mx-auto flex items-center justify-between p-4">
+<a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+<button class="menu-button" aria-label="Otwórz menu">☰</button>
+<button id="darkToggle">Przełącz tryb</button>
+<button onclick="location.href='index.html'" class="ml-4 px-4 py-2 bg-white text-green-700 rounded">Strona główna</button>
+</nav>
+</header>
+<main class="container mx-auto p-8 space-y-4">
+<div id="board" class="grid grid-cols-4 gap-2 justify-center"></div>
+</main>
+<footer class="mt-8 text-center text-sm text-green-600">
+<p>&copy; 2024 Gry Czarka</p>
+</footer>
+<script id="gameScript">
+const items=['🐶','🐱','🐰','🦊','🐻','🐼','🐨','🐯'];
+let cards=[...items,...items].sort(()=>Math.random()-0.5);
+const board=document.getElementById('board');
+cards.forEach(c=>{const b=document.createElement('button');b.className='w-16 h-16 text-2xl border-2 border-green-700 bg-white';b.dataset.v=c;b.textContent='?';b.onclick=()=>flip(b);board.appendChild(b);});
+let first=null,lock=false,m=0;
+function flip(b){if(lock||b.textContent!=='?')return;b.textContent=b.dataset.v;if(!first){first=b;}else{if(first.dataset.v===b.dataset.v){m+=2;first=null;if(m===cards.length)setTimeout(()=>alert('Brawo!'),200);}else{lock=true;setTimeout(()=>{b.textContent='?';first.textContent='?';first=null;lock=false;},1000);}}}
+</script>
+<script>
+document.querySelector('.menu-button').addEventListener('click',()=>{document.querySelector('nav').classList.toggle('open');});
+document.querySelector('#darkToggle').addEventListener('click',()=>{document.body.classList.toggle('dark-mode');});
+if(navigator.maxTouchPoints>0){
+ document.querySelectorAll('button').forEach(b=>b.addEventListener('touchstart',e=>{b.click();e.preventDefault();}));
+}
+</script>
+</body>
+</html>

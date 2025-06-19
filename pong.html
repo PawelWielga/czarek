@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gra">
+    <title>Pong</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --main-color:#065f46; --bg-color:#f0fdf4; }
+        html { scroll-behavior:smooth; }
+        body{ background-color:var(--bg-color); color:var(--main-color); }
+        body.dark-mode{ background-color:#111; color:#fff; }
+        nav ul{ display:none; }
+        nav.open ul{ display:block; }
+        @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
+        button:hover{ transform:scale(1.05); transition:transform 0.2s; }
+    </style>
+</head>
+<body>
+<header class="bg-green-700 text-white">
+<nav class="container mx-auto flex items-center justify-between p-4">
+<a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+<button class="menu-button" aria-label="Otwórz menu">☰</button>
+<button id="darkToggle">Przełącz tryb</button>
+<button onclick="location.href='index.html'" class="ml-4 px-4 py-2 bg-white text-green-700 rounded">Strona główna</button>
+</nav>
+</header>
+<main class="container mx-auto p-8 space-y-4">
+<canvas id="c" width="400" height="200" class="border mx-auto bg-white"></canvas>
+<div id="mobileControls" class="flex justify-center gap-2 mt-4 hidden">
+    <button data-m="up" class="px-3 py-1 bg-green-700 text-white rounded">⬆️</button>
+    <button data-m="down" class="px-3 py-1 bg-green-700 text-white rounded">⬇️</button>
+</div>
+</main>
+<footer class="mt-8 text-center text-sm text-green-600">
+<p>&copy; 2024 Gry Czarka</p>
+</footer>
+<script id="gameScript">
+const c=document.getElementById('c');
+const ctx=c.getContext('2d');
+let paddleY=80,ballX=200,ballY=100,vx=2,vy=2;
+document.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();paddleY=e.clientY-r.top-20;});
+function loop(){ctx.clearRect(0,0,400,200);ctx.fillRect(10,paddleY,10,40);ctx.beginPath();ctx.arc(ballX,ballY,5,0,Math.PI*2);ctx.fill();ballX+=vx;ballY+=vy;if(ballY<5||ballY>195)vy=-vy;if(ballX<20&&ballY>paddleY&&ballY<paddleY+40)vx=-vx;if(ballX>395||ballX<0){alert('Koniec');location.reload();}requestAnimationFrame(loop);}loop();
+const ctl=document.getElementById('mobileControls');
+if(navigator.maxTouchPoints>0){
+  ctl.classList.remove('hidden');
+  ctl.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    if(b.dataset.m=='up')paddleY=Math.max(0,paddleY-20);
+    if(b.dataset.m=='down')paddleY=Math.min(160,paddleY+20);
+  }));
+  c.addEventListener('touchmove',e=>{const r=c.getBoundingClientRect();paddleY=e.touches[0].clientY-r.top-20;});
+}
+</script>
+<script>
+document.querySelector('.menu-button').addEventListener('click',()=>{document.querySelector('nav').classList.toggle('open');});
+document.querySelector('#darkToggle').addEventListener('click',()=>{document.body.classList.toggle('dark-mode');});
+if(navigator.maxTouchPoints>0){
+ document.querySelectorAll('button').forEach(b=>b.addEventListener('touchstart',e=>{b.click();e.preventDefault();}));
+}
+</script>
+</body>
+</html>
