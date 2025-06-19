@@ -13,3 +13,6 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Kolonia Nad LiPau** (`kolonia.html`)
 - **Kropki.io** (`kropki.html`)
 - **Evolution Game** (`evolution-game.html`)
+- **Reaction Game** (`reaction-game.html`)
+
+- **Reaction Game (Verilog)** (`hdl/reaction_game`)

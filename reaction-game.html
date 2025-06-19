@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prosta gra na refleks">
+    <title>Reaction Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --main-color:#065f46; --bg-color:#f0fdf4; }
+        html { scroll-behavior:smooth; }
+        body{ background-color:var(--bg-color); color:var(--main-color); }
+        body.dark-mode{ background-color:#111; color:#fff; }
+        nav ul{ display:none; }
+        nav.open ul{ display:block; }
+        @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
+        button:hover{ transform:scale(1.05); transition:transform 0.2s; }
+        #leds span,#timeleds span{
+            display:inline-block; width:24px; height:24px; margin:4px;
+            border-radius:50%; background:#9ca3af;
+        }
+        .on{ background:#dc2626; }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+<header class="bg-green-700 text-white w-full">
+    <nav class="container mx-auto flex items-center justify-between p-4">
+        <a href="index.html" class="text-2xl font-bold">Gry Czarka</a>
+        <button class="menu-button" aria-label="Otwórz menu">☰</button>
+        <button id="darkToggle">Przełącz tryb</button>
+        <button onclick="location.href='index.html'" class="ml-4 px-4 py-2 bg-white text-green-700 rounded">Strona główna</button>
+    </nav>
+</header>
+<main class="container mx-auto p-8 space-y-4 flex flex-col items-center">
+    <h1 class="text-3xl font-bold">Reaction Game</h1>
+    <img src="https://via.placeholder.com/150" loading="lazy" alt="Rysunek Czarka" class="mx-auto">
+    <div id="leds" class="flex"></div>
+    <button id="action" class="px-4 py-2 bg-green-700 text-white rounded">Naciśnij</button>
+    <div id="info" class="h-6"></div>
+    <div id="timeleds" class="flex"></div>
+    <button id="reset" class="px-4 py-2 bg-green-700 text-white rounded">Resetuj</button>
+</main>
+<footer class="mt-8 text-center text-sm text-green-600">
+    <p>&copy; 2024 Gry Czarka</p>
+</footer>
+<script>
+const ledsDiv = document.getElementById('leds');
+const timeDiv = document.getElementById('timeleds');
+for(let i=0;i<3;i++){ const s=document.createElement('span'); ledsDiv.appendChild(s); }
+for(let i=0;i<4;i++){ const s=document.createElement('span'); timeDiv.appendChild(s); }
+const leds=[...ledsDiv.children];
+const timeLeds=[...timeDiv.children];
+const info=document.getElementById('info');
+let state='idle', startTime=0, delayId, flashInt, flashes=0;
+function setLeds(idx){ leds.forEach((l,i)=>l.classList.toggle('on',i===idx)); }
+function clearTime(){ timeLeds.forEach(l=>l.classList.remove('on')); }
+function showTime(ms){ const val=Math.min(15,Math.floor(ms/100)); timeLeds.forEach((l,i)=>l.classList.toggle('on', val>>i & 1)); info.textContent=`Czas reakcji: ${ms.toFixed(0)} ms`; }
+function startGame(){ clearTimeout(delayId); clearInterval(flashInt); flashes=0; state='wait'; setLeds(-1); clearTime(); info.textContent='Czekaj...'; delayId=setTimeout(()=>{ state='go'; setLeds(Math.floor(Math.random()*3)); startTime=performance.now(); info.textContent='Naciśnij teraz!'; },2000+Math.random()*2000); }
+function flashError(){ flashInt=setInterval(()=>{ leds.forEach(l=>l.classList.toggle('on')); timeLeds.forEach(l=>l.classList.toggle('on')); if(++flashes>6){ clearInterval(flashInt); startGame(); } },200); info.textContent='Za wcześnie!'; }
+function press(){ if(state==='go'){ const t=performance.now()-startTime; setLeds(-1); showTime(t); state='done'; } else if(state==='wait'){ state='error'; clearTimeout(delayId); flashError(); } }
+document.getElementById('action').onclick=press; document.getElementById('reset').onclick=startGame; window.onload=startGame;
+</script>
+<script>
+    document.querySelector('.menu-button').addEventListener('click', () => {
+        document.querySelector('nav').classList.toggle('open');
+    });
+    document.querySelector('#darkToggle').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+    });
+</script>
+</body>
+</html>
