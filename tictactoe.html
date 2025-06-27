@@ -35,7 +35,7 @@
 </footer>
 <script id="gameScript">
 const board=document.getElementById('board');
-let cells=[];for(let i=0;i<9;i++){const b=document.createElement('button');b.className='w-16 h-16 text-2xl border';b.onclick=()=>move(i);board.appendChild(b);cells.push(b);} 
+let cells=[];for(let i=0;i<9;i++){const b=document.createElement('button');b.className='w-20 h-20 text-2xl border';b.onclick=()=>move(i);board.appendChild(b);cells.push(b);} 
 let turn='X';
 function move(i){if(cells[i].textContent)return;cells[i].textContent=turn;if(check()){document.getElementById('msg').textContent=turn+' wygral';cells.forEach(btn=>btn.disabled=true);}else if(cells.every(c=>c.textContent)){document.getElementById('msg').textContent='Remis';}else{turn=turn==='X'?'O':'X';}}
 const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];

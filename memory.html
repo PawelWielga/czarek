@@ -36,7 +36,7 @@
 const items=['🐶','🐱','🐰','🦊','🐻','🐼','🐨','🐯'];
 let cards=[...items,...items].sort(()=>Math.random()-0.5);
 const board=document.getElementById('board');
-cards.forEach(c=>{const b=document.createElement('button');b.className='w-16 h-16 text-2xl border-2 border-green-700 bg-white';b.dataset.v=c;b.textContent='?';b.onclick=()=>flip(b);board.appendChild(b);});
+cards.forEach(c=>{const b=document.createElement('button');b.className='w-20 h-20 text-2xl border-2 border-green-700 bg-white';b.dataset.v=c;b.textContent='?';b.onclick=()=>flip(b);board.appendChild(b);});
 let first=null,lock=false,m=0;
 function flip(b){if(lock||b.textContent!=='?')return;b.textContent=b.dataset.v;if(!first){first=b;}else{if(first.dataset.v===b.dataset.v){m+=2;first=null;if(m===cards.length)setTimeout(()=>alert('Brawo!'),200);}else{lock=true;setTimeout(()=>{b.textContent='?';first.textContent='?';first=null;lock=false;},1000);}}}
 </script>
