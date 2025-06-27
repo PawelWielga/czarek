@@ -28,6 +28,7 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Emojowy Strzelec** (`emoji-blaster.html`)
 - **Łowca Emoji** (`emoji-fisher.html`)
 - **Łapacz Emoji** (`emoji-catcher.html`)
+- **Bee Quest** (`bee-quest/index.html`)
 
 ### Logiczne i puzzle
 - **Łączenie Kropek** (`kropki.html`)
