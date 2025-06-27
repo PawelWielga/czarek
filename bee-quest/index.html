@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gra">
+    <title>Bee Quest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --main-color:#065f46; --bg-color:#f0fdf4; }
+        html { scroll-behavior:smooth; }
+        body{ background-color:var(--bg-color); color:var(--main-color); }
+        body.dark-mode{ background-color:#111; color:#fff; }
+        nav ul{ display:none; }
+        nav.open ul{ display:block; }
+        @media(min-width:640px){ nav ul{display:flex;} .menu-button{display:none;} }
+        button:hover{ transform:scale(1.05); transition:transform 0.2s; }
+        #game{ background-image:linear-gradient(to bottom,#c6f6d5,#f0fdf4); }
+        .slot{ width:32px; height:32px; border:2px solid #aaa; background:white; display:flex; align-items:center; justify-content:center; }
+        .obstacle{ position:absolute; }
+        .bush{ width:40px; height:40px; background:green; border-radius:8px; }
+        .log{ width:60px; height:20px; background:brown; border-radius:4px; }
+        .porc{ width:40px; height:20px; background:orange; border-radius:10px; }
+        .item{ width:24px; height:24px; background:yellow; border-radius:50%; position:absolute; }
+        .clock{ background:lightblue; }
+        #bee{ width:32px; height:32px; position:absolute; display:flex; align-items:center; justify-content:center; }
+        #home{ width:40px; height:40px; background:red; position:absolute; }
+        #overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:bold; color:green; pointer-events:none; }
+        #end{ position:absolute; inset:0; background:white; display:none; flex-direction:column; align-items:center; justify-content:center; }
+    </style>
+</head>
+<body>
+<header class="bg-green-700 text-white">
+<nav class="container mx-auto flex items-center justify-between p-4">
+<a href="../index.html" class="text-2xl font-bold">Gry Czarka</a>
+<button class="menu-button" aria-label="Otwórz menu">☰</button>
+<button id="darkToggle">Przełącz tryb</button>
+<button onclick="location.href='../index.html'" class="ml-4 px-4 py-2 bg-white text-green-700 rounded">Strona główna</button>
+</nav>
+</header>
+<main class="container mx-auto p-4">
+<div id="hud" class="relative">
+<div id="score" class="absolute top-2 left-2 bg-white bg-opacity-80 px-2 rounded">0</div>
+<div id="time" class="absolute top-2 right-2 bg-white bg-opacity-80 px-2 rounded"></div>
+<div id="inventory" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1"></div>
+</div>
+<div id="game" class="relative w-full h-80 border-2 border-green-700 overflow-hidden mt-12">
+<div id="world" class="absolute inset-0"></div>
+<div id="overlay"></div>
+<div id="end" class="text-center space-y-2"></div>
+</div>
+<div id="controls" class="fixed bottom-2 right-2 grid grid-cols-3 gap-1"></div>
+</main>
+<footer class="mt-8 text-center text-sm text-green-600">
+<p>&copy; 2024 Gry Czarka</p>
+</footer>
+<script id="gameScript">
+const game=document.getElementById('game');
+const world=document.getElementById('world');
+const inventoryEl=document.getElementById('inventory');
+const scoreEl=document.getElementById('score');
+const timeEl=document.getElementById('time');
+const overlay=document.getElementById('overlay');
+const end=document.getElementById('end');
+const worldW=2000, worldH=game.clientHeight;
+world.style.width=worldW+'px';
+const bee=document.createElement('div');
+bee.id='bee';
+bee.textContent='\uD83D\uDC1D';
+world.appendChild(bee);
+let px=50,py=worldH/2,carried=[],score=0,dropped=0,timePickups=0;
+const need=5+Math.floor(Math.random()*6); // 5-10 items
+let time=need*10;
+const items=[],clocks=[],obstacles=[],porcs=[];
+function rndPos(w,h){return{ x:Math.random()*(worldW-w), y:Math.random()*(worldH-h) };}
+function noOverlap(x,y,w,h){const r={x,y,w,h}; const arr=[...items,...obstacles,...porcs,home].filter(Boolean); for(const o of arr){if(o.x<w+o.x&&o.x<r.x+r.w&&o.y<h+o.y&&o.y<r.y+r.h) return false;} return true;}
+function place(el,obj){el.style.left=obj.x+'px'; el.style.top=obj.y+'px';}
+function makeItem(hidden=false){const el=document.createElement('div');el.className='item';if(hidden) el.style.opacity='0.2';const p=rndPos(24,24);obj={el,x:p.x,y:p.y,w:24,h:24,hidden};items.push(obj);world.appendChild(el);place(el,obj);} // w/h 24
+function makeClock(){const el=document.createElement('div');el.className='item clock';const p=rndPos(24,24);obj={el,x:p.x,y:p.y,w:24,h:24};clocks.push(obj);world.appendChild(el);place(el,obj);}
+function makeObs(type){const el=document.createElement('div');el.className='obstacle '+type;const wh=type==='bush'?{w:40,h:40}:type==='log'?{w:60,h:20}:{w:40,h:20};let p;do{p=rndPos(wh.w,wh.h);}while(!noOverlap(p.x,p.y,wh.w,wh.h));const obj={el,x:p.x,y:p.y,w:wh.w,h:wh.h};obstacles.push(obj);world.appendChild(el);place(el,obj);}
+function makePorc(){const el=document.createElement('div');el.className='obstacle porc';const wh={w:40,h:20};let p;do{p=rndPos(wh.w,wh.h);}while(!noOverlap(p.x,p.y,wh.w,wh.h));const obj={el,x:p.x,y:p.y,w:wh.w,h:wh.h};porcs.push(obj);world.appendChild(el);place(el,obj);}
+let home={};
+function makeHome(){const el=document.createElement('div');el.id='home';const p={x:worldW-60,y:worldH-60};home={el,x:p.x,y:p.y,w:40,h:40};world.appendChild(el);place(el,home);} 
+for(let i=0;i<need;i++) makeItem(Math.random()<0.3);
+for(let i=0;i<2;i++) makeClock();
+for(let i=0;i<5;i++) makeObs('bush');
+for(let i=0;i<3;i++) makeObs('log');
+for(let i=0;i<2;i++) makePorc();
+makeHome();
+const slots=3;for(let i=0;i<slots;i++){const s=document.createElement('div');s.className='slot';inventoryEl.appendChild(s);} 
+function updateInv(){inventoryEl.querySelectorAll('.slot').forEach((s,i)=>{s.textContent=carried[i]?"*":"";});}
+updateInv();
+function collide(a,b){return a.x<a.w+b.x&&b.x<b.w+a.x&&a.y<a.h+b.y&&b.y<b.h+a.y;}
+function respawn(){px=Math.min(worldW-60,px+80);py=worldH/2;overlay.textContent='Game Over';setTimeout(()=>{overlay.textContent='';},1000);if(carried.length){carried.pop();dropped++;updateInv();}}
+function deliver(){score+=carried.length;carried=[];updateInv();}
+function showEnd(){end.style.display='flex';let total=score+timePickups-dropped+(time>0?Math.floor(time/5):0);end.innerHTML=`<p>Koniec Gry!</p><p>Zebrane: ${score}</p><p>Bonus czasowy: ${timePickups}</p><p>Stracone: ${dropped}</p><p>Pozostały czas: ${time}</p><p>Wynik: ${total}</p>`;let best=+localStorage.getItem('beeBest')||0;if(total>best){best=total;localStorage.setItem('beeBest',best);}end.innerHTML+=`<p>Najlepszy wynik: ${best}</p>`;}
+function tick(){time--;if(time<0)time=0;timeEl.textContent=time; if(time===0) clearInterval(timer); }
+let timer=setInterval(tick,1000);timeEl.textContent=time;
+let keys={};document.addEventListener('keydown',e=>{keys[e.key]=true;});document.addEventListener('keyup',e=>{keys[e.key]=false;});
+function move(){if(keys['ArrowLeft']||keys['a'])px-=3;if(keys['ArrowRight']||keys['d'])px+=3;if(keys['ArrowUp']||keys['w'])py-=3;if(keys['ArrowDown']||keys['s'])py+=3;px=Math.max(0,Math.min(worldW-32,px));py=Math.max(0,Math.min(worldH-32,py));bee.style.left=px+'px';bee.style.top=py+'px';let offset=Math.min(0,Math.max(game.clientWidth-worldW,-px+game.clientWidth/2));world.style.transform=`translateX(${offset}px)`;}
+function check(){const a={x:px,y:py,w:32,h:32};for(const c of clocks){if(c.el&&collide(a,c)){time+=5;timePickups++;world.removeChild(c.el);c.el=null;}}for(const it of items){if(it.el&&collide(a,it)&&carried.length<slots){carried.push(it);world.removeChild(it.el);it.el=null;updateInv();}}
+for(const o of porcs){if(collide(a,o)){respawn();break;}}
+for(const o of obstacles){if(collide(a,o)){px-=keys['ArrowRight']||keys['d']?3:0;px+=keys['ArrowLeft']||keys['a']?3:0;py-=keys['ArrowDown']||keys['s']?3:0;py+=keys['ArrowUp']||keys['w']?3:0;}}
+if(collide(a,home)&&score+carried.length>=need){deliver();showEnd();}
+}
+function loop(){move();check();requestAnimationFrame(loop);}loop();
+</script>
+<script>
+const controls=document.getElementById('controls');
+if(navigator.maxTouchPoints>0){['','▲','▼','◀','▶'].forEach(()=>{});const up=document.createElement('button');up.textContent='⬆️';const down=document.createElement('button');down.textContent='⬇️';const left=document.createElement('button');left.textContent='⬅️';const right=document.createElement('button');right.textContent='➡️';controls.appendChild(up);controls.appendChild(left);controls.appendChild(down);controls.appendChild(right);controls.querySelectorAll('button').forEach(b=>{b.className='px-2 py-1 bg-white bg-opacity-80 rounded';});up.addEventListener('touchstart',()=>keys['ArrowUp']=true);up.addEventListener('touchend',()=>keys['ArrowUp']=false);down.addEventListener('touchstart',()=>keys['ArrowDown']=true);down.addEventListener('touchend',()=>keys['ArrowDown']=false);left.addEventListener('touchstart',()=>keys['ArrowLeft']=true);left.addEventListener('touchend',()=>keys['ArrowLeft']=false);right.addEventListener('touchstart',()=>keys['ArrowRight']=true);right.addEventListener('touchend',()=>keys['ArrowRight']=false);}
+document.querySelector('.menu-button').addEventListener('click',()=>{document.querySelector('nav').classList.toggle('open');});
+document.querySelector('#darkToggle').addEventListener('click',()=>{document.body.classList.toggle('dark-mode');});
+</script>
+</body>
+</html>
