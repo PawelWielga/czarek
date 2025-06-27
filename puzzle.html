@@ -45,7 +45,7 @@
 const board=document.getElementById('board');
 let tiles=[1,2,3,4,5,6,7,8,0];
 function shuffle(){tiles.sort(()=>Math.random()-0.5);if(tiles.join('')==='123456780')shuffle();}
-function draw(){board.innerHTML='';tiles.forEach((n,i)=>{const b=document.createElement('button');b.className='w-10 h-10 border';b.textContent=n?n:'';b.onclick=()=>move(i);board.appendChild(b);});}
+function draw(){board.innerHTML='';tiles.forEach((n,i)=>{const b=document.createElement('button');b.className='w-12 h-12 border';b.textContent=n?n:'';b.onclick=()=>move(i);board.appendChild(b);});}
 function move(i){const pos=tiles.indexOf(0);const s=[pos-1,pos+1,pos-3,pos+3];if(s.includes(i)){[tiles[i],tiles[pos]]=[tiles[pos],tiles[i]];draw();if(tiles.join('')==='123456780')document.getElementById('msg').textContent='Ulozyles!';}}
 function moveDir(dx,dy){const pos=tiles.indexOf(0);const x=pos%3,y=Math.floor(pos/3);const nx=x+dx,ny=y+dy;if(nx>=0&&nx<3&&ny>=0&&ny<3){const i=ny*3+nx;move(i);}}
 shuffle();draw();
