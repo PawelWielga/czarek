@@ -12,6 +12,7 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Ocean Explorer** (`ocean.html`)
 - **Pogodynka** (`weather.html`)
 - **Park Emotech** (`emotech.html`)
+- **Gra Sandbox** (`sandbox.html`)
 
 ### Zręcznościowe
 - **Cactus Jumper** (`kaktusy.html`)
