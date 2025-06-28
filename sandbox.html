@@ -54,11 +54,39 @@ function drawGround() {
   ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
 }
 
+function drawGrass() {
+  ctx.fillStyle = '#2e8b57';
+  for (let i = 0; i < canvas.width; i += 20) {
+    ctx.beginPath();
+    ctx.moveTo(i, canvas.height - 100);
+    ctx.lineTo(i + 5, canvas.height - 110);
+    ctx.lineTo(i + 10, canvas.height - 100);
+    ctx.fill();
+  }
+}
+
 function drawAnimals() {
   ctx.fillStyle = 'brown';
   animals.forEach(animal => {
     ctx.beginPath();
     ctx.arc(animal.x, animal.y, 30, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(animal.x - 15, animal.y + 30);
+    ctx.lineTo(animal.x - 15, animal.y + 40);
+    ctx.moveTo(animal.x + 15, animal.y + 30);
+    ctx.lineTo(animal.x + 15, animal.y + 40);
+    ctx.stroke();
+
+    ctx.fillStyle = 'green';
+    ctx.beginPath();
+    ctx.ellipse(animal.x - 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(animal.x + 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
     ctx.fill();
   });
 }
@@ -88,6 +116,7 @@ canvas.addEventListener('click', e => {
 function gameLoop() {
   drawSky();
   drawGround();
+  drawGrass();
   drawAnimals();
   requestAnimationFrame(gameLoop);
 }
