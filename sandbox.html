@@ -46,6 +46,26 @@ const animals = [
   {x: 200, y: 350, text: 'KOCHAM WAS WSZYSTKICH!', shape: 'heart'}
 ];
 
+let offsetX = 0;
+const maxAnimalX = Math.max(...animals.map(a => a.x));
+let maxOffset = Math.max(0, maxAnimalX + 50 - canvas.width);
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  maxOffset = Math.max(0, maxAnimalX + 50 - canvas.width);
+  offsetX = Math.min(offsetX, maxOffset);
+});
+
+document.addEventListener('keydown', e => {
+  const step = 20;
+  if (e.key === 'ArrowLeft') {
+    offsetX = Math.max(0, offsetX - step);
+  } else if (e.key === 'ArrowRight') {
+    offsetX = Math.min(maxOffset, offsetX + step);
+  }
+});
+
 function drawSky() {
   ctx.fillStyle = timeOfDay === 0 ? '#87CEEB' : '#1a1a40';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -110,30 +130,30 @@ function drawHeart(heart) {
 function drawAnimals() {
   animals.forEach(animal => {
     if (animal.shape === 'bird') {
-      drawBird(animal);
+      drawBird({x: animal.x - offsetX, y: animal.y});
     } else if (animal.shape === 'heart') {
-      drawHeart(animal);
+      drawHeart({x: animal.x - offsetX, y: animal.y});
     } else {
       ctx.fillStyle = 'brown';
       ctx.beginPath();
-      ctx.arc(animal.x, animal.y, 30, 0, Math.PI * 2);
+      ctx.arc(animal.x - offsetX, animal.y, 30, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(animal.x - 15, animal.y + 30);
-      ctx.lineTo(animal.x - 15, animal.y + 40);
-      ctx.moveTo(animal.x + 15, animal.y + 30);
-      ctx.lineTo(animal.x + 15, animal.y + 40);
+      ctx.moveTo(animal.x - offsetX - 15, animal.y + 30);
+      ctx.lineTo(animal.x - offsetX - 15, animal.y + 40);
+      ctx.moveTo(animal.x - offsetX + 15, animal.y + 30);
+      ctx.lineTo(animal.x - offsetX + 15, animal.y + 40);
       ctx.stroke();
 
       ctx.fillStyle = 'green';
       ctx.beginPath();
-      ctx.ellipse(animal.x - 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
+      ctx.ellipse(animal.x - offsetX - 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.ellipse(animal.x + 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
+      ctx.ellipse(animal.x - offsetX + 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
       ctx.fill();
     }
   });
@@ -141,10 +161,10 @@ function drawAnimals() {
 
 function checkClick(x, y) {
   for (let animal of animals) {
-    let dx = x - animal.x;
+    let dx = x + offsetX - animal.x;
     let dy = y - animal.y;
     if (Math.sqrt(dx * dx + dy * dy) < 30) {
-      bubble.style.left = (animal.x - 40) + 'px';
+      bubble.style.left = (animal.x - offsetX - 40) + 'px';
       bubble.style.top = (animal.y - 60) + 'px';
       bubble.innerText = animal.text;
       bubble.style.display = 'block';
