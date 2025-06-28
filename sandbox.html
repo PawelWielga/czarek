@@ -41,7 +41,9 @@ let bubble = document.getElementById('bubble');
 const animals = [
   {x: 100, y: 300, text: 'Miau, jestem kotem!'},
   {x: 300, y: 250, text: 'Jestem drzewem, które mówi!'},
-  {x: 500, y: 320, text: 'Uważaj, idzie burza!'}
+  {x: 500, y: 320, text: 'Uważaj, idzie burza!'},
+  {x: 700, y: 260, text: 'CHCĘ KABANOSA!', shape: 'bird'},
+  {x: 200, y: 350, text: 'KOCHAM WAS WSZYSTKICH!', shape: 'heart'}
 ];
 
 function drawSky() {
@@ -65,29 +67,75 @@ function drawGrass() {
   }
 }
 
+function drawBird(bird) {
+  ctx.fillStyle = 'pink';
+  ctx.beginPath();
+  ctx.arc(bird.x, bird.y, 20, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(bird.x - 20, bird.y);
+  ctx.lineTo(bird.x - 35, bird.y - 10);
+  ctx.lineTo(bird.x - 20, bird.y + 10);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(bird.x + 20, bird.y);
+  ctx.lineTo(bird.x + 35, bird.y - 10);
+  ctx.lineTo(bird.x + 20, bird.y + 10);
+  ctx.fill();
+
+  ctx.fillStyle = 'orange';
+  ctx.beginPath();
+  ctx.moveTo(bird.x + 20, bird.y);
+  ctx.lineTo(bird.x + 30, bird.y - 5);
+  ctx.lineTo(bird.x + 30, bird.y + 5);
+  ctx.fill();
+}
+
+function drawHeart(heart) {
+  ctx.fillStyle = 'purple';
+  ctx.beginPath();
+  ctx.moveTo(heart.x, heart.y + 10);
+  ctx.bezierCurveTo(heart.x - 25, heart.y - 20, heart.x - 25, heart.y + 20, heart.x, heart.y + 30);
+  ctx.bezierCurveTo(heart.x + 25, heart.y + 20, heart.x + 25, heart.y - 20, heart.x, heart.y + 10);
+  ctx.fill();
+
+  ctx.fillStyle = 'white';
+  ctx.font = '16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('☺', heart.x, heart.y + 12);
+}
+
 function drawAnimals() {
-  ctx.fillStyle = 'brown';
   animals.forEach(animal => {
-    ctx.beginPath();
-    ctx.arc(animal.x, animal.y, 30, 0, Math.PI * 2);
-    ctx.fill();
+    if (animal.shape === 'bird') {
+      drawBird(animal);
+    } else if (animal.shape === 'heart') {
+      drawHeart(animal);
+    } else {
+      ctx.fillStyle = 'brown';
+      ctx.beginPath();
+      ctx.arc(animal.x, animal.y, 30, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(animal.x - 15, animal.y + 30);
-    ctx.lineTo(animal.x - 15, animal.y + 40);
-    ctx.moveTo(animal.x + 15, animal.y + 30);
-    ctx.lineTo(animal.x + 15, animal.y + 40);
-    ctx.stroke();
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(animal.x - 15, animal.y + 30);
+      ctx.lineTo(animal.x - 15, animal.y + 40);
+      ctx.moveTo(animal.x + 15, animal.y + 30);
+      ctx.lineTo(animal.x + 15, animal.y + 40);
+      ctx.stroke();
 
-    ctx.fillStyle = 'green';
-    ctx.beginPath();
-    ctx.ellipse(animal.x - 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(animal.x + 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = 'green';
+      ctx.beginPath();
+      ctx.ellipse(animal.x - 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(animal.x + 10, animal.y - 30, 5, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
   });
 }
 
