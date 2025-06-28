@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Gra Sandbox</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #87CEEB;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      background-color: #bdecb6;
+    }
+    .bubble {
+      position: absolute;
+      background: white;
+      border-radius: 10px;
+      padding: 4px 8px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+      font-size: 14px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="bubble" class="bubble" style="display: none;">Cześć!</div>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let timeOfDay = 0; // 0 = dzień, 1 = noc
+let bubble = document.getElementById('bubble');
+
+const animals = [
+  {x: 100, y: 300, text: 'Miau, jestem kotem!'},
+  {x: 300, y: 250, text: 'Jestem drzewem, które mówi!'},
+  {x: 500, y: 320, text: 'Uważaj, idzie burza!'}
+];
+
+function drawSky() {
+  ctx.fillStyle = timeOfDay === 0 ? '#87CEEB' : '#1a1a40';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawGround() {
+  ctx.fillStyle = '#228B22';
+  ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+}
+
+function drawAnimals() {
+  ctx.fillStyle = 'brown';
+  animals.forEach(animal => {
+    ctx.beginPath();
+    ctx.arc(animal.x, animal.y, 30, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function checkClick(x, y) {
+  for (let animal of animals) {
+    let dx = x - animal.x;
+    let dy = y - animal.y;
+    if (Math.sqrt(dx * dx + dy * dy) < 30) {
+      bubble.style.left = (animal.x - 40) + 'px';
+      bubble.style.top = (animal.y - 60) + 'px';
+      bubble.innerText = animal.text;
+      bubble.style.display = 'block';
+      setTimeout(() => bubble.style.display = 'none', 3000);
+      return;
+    }
+  }
+}
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  checkClick(x, y);
+});
+
+function gameLoop() {
+  drawSky();
+  drawGround();
+  drawAnimals();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
