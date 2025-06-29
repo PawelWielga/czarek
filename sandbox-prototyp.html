@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sandbox Prototyp</title>
+  <style>
+    body { display: flex; justify-content: center; margin-top: 50px; font-family: Arial; }
+    #gameCanvas { border: 1px solid black; }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="500" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const gridSize = 10;
+    const cellSize = canvas.width / gridSize;
+
+    // plansza - 2D tablica, 0 = puste, 1 = roślina
+    let board = Array(gridSize).fill(null).map(() => Array(gridSize).fill(0));
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          if (board[y][x] === 1) {
+            ctx.fillStyle = 'green';
+            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          } else {
+            ctx.fillStyle = '#ddd';
+            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          }
+          ctx.strokeStyle = 'black';
+          ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / cellSize);
+      const y = Math.floor((e.clientY - rect.top) / cellSize);
+      if (board[y][x] === 0) {
+        board[y][x] = 1; // sadzimy roślinę
+      } else {
+        board[y][x] = 0; // usuwamy roślinę
+      }
+      drawGrid();
+    });
+
+    drawGrid();
+  </script>
+</body>
+</html>

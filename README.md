@@ -13,6 +13,7 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Pogodynka** (`weather.html`)
 - **Park Emotech** (`emotech.html`)
 - **Gra Sandbox** (`sandbox.html`)
+- **Sandbox Prototyp** (`sandbox-prototyp.html`)
 
 ### Zręcznościowe
 - **Cactus Jumper** (`kaktusy.html`)
