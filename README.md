@@ -8,6 +8,7 @@ Public landing page: <https://pawelwielga.github.io/czarek/>
 - **Symulator Ewolucji** (`ewolucja.html`)
 - **Kolonia LiPau** (`kolonia.html`)
 - **Ogród Roślinny** (`roslinna.html`)
+- **Kwiatkowa Przygoda** (`kwiatki.html`)
 - **Podwodny Stwór** (`morskie.html`)
 - **Ocean Explorer** (`ocean.html`)
 - **Pogodynka** (`weather.html`)
